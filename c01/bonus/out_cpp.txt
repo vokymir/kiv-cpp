@@ -1,0 +1,6 @@
+Prumer celeho pole je: 2.640096
+Prumer prvni pulky pole je: 2.643804
+Prumer druhe pulky pole je: 2.636388
+Prumer celeho pole je: 2.597454
+Prumer prvni pulky pole je: 2.611544
+Prumer druhe pulky pole je: 2.583364

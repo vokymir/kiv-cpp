@@ -1,0 +1,5 @@
+gcc in.c
+./a.out > out_c.txt
+g++ out.cpp
+./a.out > out_cpp.txt
+diff out_c.txt out_cpp.txt -w -i -y
