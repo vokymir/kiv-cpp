@@ -1,6 +1,7 @@
 #include <cstddef>
 #include <cstdio>
 #include <iostream>
+#include <iterator>
 #include <memory>
 #include <string>
 #include <vector>
@@ -47,7 +48,15 @@ public:
         char c_str[100];
 
         if(fgets(c_str, sizeof(c_str), fptr) == nullptr){
-            std::cout << "An error occured when reading line in file: " + m_filename << std::endl;
+            if (feof(fptr)){
+                std::cout << "End of file (" + m_filename + ") was already reached." << std::endl;
+            }
+            else if (ferror(fptr)){
+                std::cout << "An error occured when reading line in file: " + m_filename << std::endl;
+            }
+            else{
+                std::cout << "Something very bad happened when reading line in file: " + m_filename << std::endl;
+            }
             return "";
         }
 
