@@ -17,7 +17,8 @@ public:
         m_filename = a_filename;
         fptr = fopen(m_filename.c_str(), "r+");
         if (fptr == nullptr){
-            std::cout << "File "+ m_filename + " doesn't exist." << std::endl;
+            std::cout << "File "+ m_filename + " doesn't exist => creating file." << std::endl;
+            fptr = fopen(m_filename.c_str(), "w+");
         }
     }
 
