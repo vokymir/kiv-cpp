@@ -1,0 +1,12 @@
+1 - vytvorit class Vector2D (x,y) (double)
+Vector 2D a(1,2);
+Vector 2D b(3,-5);
+
+2 - def operatory pro + a -
+auto c = a + b;
+
+3 - def operator compound addition +=
+a += b;
+
+4 - def operator nasobeni skalarem
+auto d = a * 5.0;
