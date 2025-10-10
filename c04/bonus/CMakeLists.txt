@@ -1,0 +1,7 @@
+CMAKE_MINIMUM_REQUIRED(VERSION 4.1)
+
+PROJECT(kiv-cpp-02)
+
+SET(CMAKE_CXX_STANDARD 23)
+
+ADD_EXECUTABLE(kiv-cpp-02 main.cpp analyzer.cpp analyzer.h)
