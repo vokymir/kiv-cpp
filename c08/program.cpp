@@ -5,7 +5,7 @@
 #include <thread>
 
 /*
- * Muze to nefungovat, pokud bude ctenar naplanovan jako prvni.
+ * Ted uz to vzdycky zacne pisar.
  * */
 
 std::mutex mtx;
@@ -13,10 +13,11 @@ std::condition_variable cv;
 int vysledek = -1;
 
 void ctenar() {
+  int last = vysledek;
   while (true) {
     std::unique_lock<std::mutex> lck(mtx);
 
-    cv.wait(lck);
+    cv.wait(lck, [&last]() { return last != vysledek; });
 
     std::cout << "MAM: " << vysledek << std::endl;
 
