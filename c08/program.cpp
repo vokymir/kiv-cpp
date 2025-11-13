@@ -7,15 +7,12 @@ std::mutex mtx;
 
 void psani_z_vlakna(std::string slovo) {
   for (int i = 0; i < 300; i++) {
-
-    mtx.lock();
+    std::lock_guard<std::mutex> lock(mtx);
 
     for (auto c : slovo) {
       std::cout << c;
     }
     std::cout << std::endl;
-
-    mtx.unlock();
   }
 }
 
