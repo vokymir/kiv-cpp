@@ -1,34 +1,48 @@
+#include <condition_variable>
 #include <iostream>
 #include <mutex>
 #include <string>
 #include <thread>
 
+/*
+ * Muze to nefungovat, pokud bude ctenar naplanovan jako prvni.
+ * */
+
 std::mutex mtx;
+std::condition_variable cv;
+int vysledek = -1;
 
-void psani_z_vlakna(std::string slovo) {
-  for (int i = 0; i < 300; i++) {
-    std::lock_guard<std::mutex> lock(mtx);
+void ctenar() {
+  while (true) {
+    std::unique_lock<std::mutex> lck(mtx);
 
-    for (auto c : slovo) {
-      std::cout << c;
-    }
-    std::cout << std::endl;
+    cv.wait(lck);
+
+    std::cout << "MAM: " << vysledek << std::endl;
+
+    cv.notify_one();
+  }
+}
+
+void pisar() {
+
+  for (int i = 0; i < 1000; i++) {
+    std::unique_lock<std::mutex> lck(mtx);
+    vysledek++;
+    std::cout << "VYMYSLEL JSEM: " << vysledek << std::endl;
+
+    cv.notify_one();
+
+    cv.wait(lck);
   }
 }
 
 int main() {
-  std::thread a(&psani_z_vlakna, "ahoj");
-  std::thread b(&psani_z_vlakna, "bojo");
-  std::thread c(&psani_z_vlakna, "coho");
+  std::thread ct(&ctenar);
+  std::thread pi(&pisar);
 
-  psani_z_vlakna("TOHO");
-
-  a.join();
-  std::cout << "===== KONEC A =====" << std::endl;
-  b.join();
-  std::cout << "===== KONEC B =====" << std::endl;
-  c.join();
-  std::cout << "===== KONEC C =====" << std::endl;
+  pi.join();
+  ct.join();
 
   return 0;
 }
