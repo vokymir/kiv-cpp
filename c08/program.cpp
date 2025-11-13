@@ -1,41 +1,63 @@
+#include <algorithm>
+#include <chrono>
 #include <condition_variable>
+#include <execution>
 #include <future>
 #include <iostream>
 #include <mutex>
 #include <string>
 #include <thread>
+#include <vector>
+
+/*
+ * Preklad pomoci:
+ * g++ -std=c++23 program.cpp -ltbb -o main
+ *
+ * ten flag -ltbb je dulezitej, jinak stena erroru
+ * */
 
 int main() {
-  int local_result = 0;
 
-  // async vs deferred
-  auto fut = std::async(std::launch::deferred, []() -> int {
-    std::cout << "ASYNC START" << std::endl;
+  {
 
-    int async_result = 0;
+    std::vector<double> cisla;
+    cisla.resize(100'000'000);
 
-    for (int i = 0; i < 1000000; i++) {
-      async_result *= 2;
-      async_result += 1;
-    }
+    auto tp_start = std::chrono::high_resolution_clock::now();
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(5000));
+    std::fill(cisla.begin(), cisla.end(), 10.0);
 
-    std::cout << "ASYNC DONE" << std::endl;
+    auto result = std::reduce(cisla.begin(), cisla.end());
 
-    return async_result;
-  });
+    auto tp_end = std::chrono::high_resolution_clock::now();
+    auto diff = tp_end - tp_start;
+    auto ms =
+        std::chrono::duration_cast<std::chrono::milliseconds>(diff).count();
 
-  for (int i = 0; i < 1000000; i++) {
-    local_result *= 3;
-    local_result -= 10;
+    std::cout << "SECTENO, PODTRZENO: " << result << std::endl;
+    std::cout << "TRVALO TO: " << ms << " ms" << std::endl;
   }
 
-  std::cout << "LOCAL DONE" << std::endl;
+  {
 
-  int global_result = local_result + fut.get();
+    std::vector<double> cisla;
+    cisla.resize(100'000'000);
 
-  std::cout << "VYSLEDEK: " << global_result << std::endl;
+    auto tp_start = std::chrono::high_resolution_clock::now();
+
+    std::fill(std::execution::par_unseq, cisla.begin(), cisla.end(), 10.0);
+
+    auto result =
+        std::reduce(std::execution::par_unseq, cisla.begin(), cisla.end());
+
+    auto tp_end = std::chrono::high_resolution_clock::now();
+    auto diff = tp_end - tp_start;
+    auto ms =
+        std::chrono::duration_cast<std::chrono::milliseconds>(diff).count();
+
+    std::cout << "SECTENO, PODTRZENO: " << result << std::endl;
+    std::cout << "TRVALO TO: " << ms << " ms" << std::endl;
+  }
 
   return 0;
 }
