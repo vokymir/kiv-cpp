@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+
 class Shape {
 public:
   // Apply translation for x and y.
