@@ -1,6 +1,7 @@
 
 #include "Parser.hpp"
 #include "Canvas.hpp"
+#include "Circle.hpp"
 #include "Line.hpp"
 #include <array>
 #include <iostream>
@@ -59,14 +60,16 @@ void Parser::parse_line_cmd(std::istringstream &iss, Canvas &c) {
     read_token(iss, arr[i]);
   }
 
-  if (arr[0] == arr[2] && arr[1] == arr[3]) {
-    throw std::runtime_error("TODO: nesmeji splyvat");
-  }
-
   c.add_shape(std::make_unique<Line>(arr));
 }
 
 void Parser::parse_circle_cmd(std::istringstream &iss, Canvas &c) {
   int x, y;
   float r;
+
+  read_token(iss, x);
+  read_token(iss, y);
+  read_token(iss, r);
+
+  c.add_shape(std::make_unique<Circle>(x, y, r));
 }
