@@ -3,6 +3,7 @@
 #include "Canvas.hpp"
 #include "Line.hpp"
 #include "Point.hpp"
+#include <array>
 #include <iostream>
 #include <memory>
 #include <sstream>
@@ -43,7 +44,7 @@ void Parser::parse_file(std::ifstream &f, Canvas &c) {
 }
 
 void Parser::parse_line_cmd(std::istringstream &iss, Canvas &c) {
-  int arr[4];
+  std::array<int, 4> arr;
   for (int i = 0; i < 4; i++) {
     read_token(iss, arr[i]);
   }

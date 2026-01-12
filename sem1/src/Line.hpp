@@ -2,6 +2,7 @@
 
 #include "Point.hpp"
 #include "Shape.hpp"
+#include <array>
 
 class Line : public Shape {
 private:
@@ -18,4 +19,6 @@ public:
 
   Line(const Point &p1, const Point &p2) : p1_(p1), p2_(p2) {}
   Line(int x1, int y1, int x2, int y2) : p1_(x1, y1), p2_(x2, y2) {}
+  Line(const std::array<int, 4> &arr)
+      : p1_(arr[0], arr[1]), p2_(arr[2], arr[3]) {}
 };
