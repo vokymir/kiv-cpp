@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.16)
 # using with Neovim
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-project(drawing LANGUAGES CXX)
+project(drawing.exe LANGUAGES CXX)
 
 # C++ version
 set(CMAKE_CXX_STANDARD 23)
