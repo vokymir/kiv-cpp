@@ -3,6 +3,7 @@
 #include "Canvas.hpp"
 #include "Circle.hpp"
 #include "Line.hpp"
+#include "Rectangle.hpp"
 #include <array>
 #include <iostream>
 #include <memory>
@@ -82,5 +83,5 @@ void Parser::parse_rect_cmd(std::istringstream &iss, Canvas &c) {
   read_token(iss, w);
   read_token(iss, h);
 
-  c.add_shape(std::make_unique<Circle>(x, y, r));
+  c.add_shape(std::make_unique<Rectangle>(x, y, w, h));
 }
