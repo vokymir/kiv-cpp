@@ -2,6 +2,7 @@
 
 #include "Shape.hpp"
 #include <memory>
+#include <string>
 #include <vector>
 
 // Canvas to which any Shape could be added.
@@ -37,4 +38,9 @@ public:
 
   // Add any shape to the canvas.
   void add_shape(std::unique_ptr<Shape> s);
+
+  // DRAW
+
+  std::string draw_svg();
+  std::string draw_pgm();
 };
