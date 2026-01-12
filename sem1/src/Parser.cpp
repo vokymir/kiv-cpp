@@ -73,3 +73,14 @@ void Parser::parse_circle_cmd(std::istringstream &iss, Canvas &c) {
 
   c.add_shape(std::make_unique<Circle>(x, y, r));
 }
+
+void Parser::parse_rect_cmd(std::istringstream &iss, Canvas &c) {
+  int x, y, w, h;
+
+  read_token(iss, x);
+  read_token(iss, y);
+  read_token(iss, w);
+  read_token(iss, h);
+
+  c.add_shape(std::make_unique<Circle>(x, y, r));
+}

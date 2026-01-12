@@ -7,10 +7,15 @@ private:
 
 public:
   int x() const { return x_; }
-  void x(int new_x) { x_ = new_x; }
+  void x(int x) { x_ = x; }
 
   int y() const { return y_; }
-  void y(int new_y) { y_ = new_y; }
+  void y(int y) { y_ = y; }
+
+  void set(int x, int y) {
+    x_ = x;
+    y_ = y;
+  }
 
   Point() {}
   Point(int x, int y) : x_(x), y_(y) {}
