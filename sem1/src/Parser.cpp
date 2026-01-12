@@ -2,7 +2,6 @@
 #include "Parser.hpp"
 #include "Canvas.hpp"
 #include "Line.hpp"
-#include "Point.hpp"
 #include <array>
 #include <iostream>
 #include <memory>
@@ -10,12 +9,15 @@
 #include <stdexcept>
 #include <string>
 
-void Parser::parse_row(const std::string &row, Canvas &c) {
+bool Parser::parse_row(const std::string &row, Canvas &c) {
   std::istringstream iss(row);
   std::string token;
 
   read_token(iss, token);
-  if (token == "line") {
+  if (token.empty()) {
+    // empty line, maybe just a comment
+    return false;
+  } else if (token == "line") {
     parse_line_cmd(iss, c);
   } else if (token == "circle") {
     parse_circle_cmd(iss, c);
@@ -27,20 +29,28 @@ void Parser::parse_row(const std::string &row, Canvas &c) {
     parse_rotate_cmd(iss, c);
   } else if (token == "scale") {
     parse_scale_cmd(iss, c);
-  } else { // TODO: nicer output
-    std::cout << "WEIRD_LINE" << std::endl;
+  } else {
+    throw std::runtime_error("TODO: invalid line in input file");
   }
+
+  return true;
 }
 
-void Parser::parse_file(std::ifstream &f, Canvas &c) {
+int Parser::parse_file(std::ifstream &f, Canvas &c) {
   if (!f) {
     throw std::runtime_error("Failed to open file for read.");
   }
 
   std::string row;
+  int n_rows = 0;
+
   while (std::getline(f, row)) {
-    parse_row(row, c);
+    if (parse_row(row, c)) {
+      n_rows++;
+    }
   }
+
+  return n_rows;
 }
 
 void Parser::parse_line_cmd(std::istringstream &iss, Canvas &c) {
@@ -49,5 +59,14 @@ void Parser::parse_line_cmd(std::istringstream &iss, Canvas &c) {
     read_token(iss, arr[i]);
   }
 
+  if (arr[0] == arr[2] && arr[1] == arr[3]) {
+    throw std::runtime_error("TODO: nesmeji splyvat");
+  }
+
   c.add_shape(std::make_unique<Line>(arr));
+}
+
+void Parser::parse_circle_cmd(std::istringstream &iss, Canvas &c) {
+  int x, y;
+  float r;
 }

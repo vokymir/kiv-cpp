@@ -8,7 +8,8 @@
 
 class Parser {
 private:
-  static void parse_row(const std::string &row, Canvas &c);
+  // Return true if there was a valid statement, not only comment.
+  static bool parse_row(const std::string &row, Canvas &c);
   static void parse_line_cmd(std::istringstream &iss, Canvas &c);
   static void parse_circle_cmd(std::istringstream &iss, Canvas &c);
   static void parse_rect_cmd(std::istringstream &iss, Canvas &c);
@@ -18,8 +19,8 @@ private:
 
 public:
   // Parse given source file from begin to end, line-by-line. Perform found
-  // operations on given canvas.
-  static void parse_file(std::ifstream &f, Canvas &c);
+  // operations on given canvas. Return number of successfully parsed rows.
+  static int parse_file(std::ifstream &f, Canvas &c);
 
 private:
   // template
