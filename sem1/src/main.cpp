@@ -1,5 +1,6 @@
 
 #include "Canvas.hpp"
+#include "Parser.hpp"
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -28,13 +29,15 @@ int main(int argc, char **argv) {
   int width = std::stoi(size.substr(0, pos));
   int height = std::stoi(size.substr(pos + 1));
 
-  Canvas c(width, height);
+  Canvas canvas(width, height);
 
   std::ifstream source_file(source);
   if (!source_file) {
     std::cerr << "Failed to open file\n";
     return 1;
   }
+
+  Parser::parse_file(source_file, canvas);
 
   std::string line;
   while (std::getline(source_file, line)) {
