@@ -14,4 +14,8 @@ public:
 
   Point() {}
   Point(int x, int y) : x_(x), y_(y) {}
+
+  bool operator==(const Point &other) const {
+    return x_ == other.x_ && y_ == other.y_;
+  }
 };

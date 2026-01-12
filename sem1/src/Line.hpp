@@ -3,6 +3,7 @@
 #include "Point.hpp"
 #include "Shape.hpp"
 #include <array>
+#include <stdexcept>
 
 class Line : public Shape {
 private:
@@ -17,9 +18,18 @@ public:
   std::string draw_svg() override;
   std::string draw_pgm() override;
 
-  Line() {}
-  Line(const Point &p1, const Point &p2) : p1_(p1), p2_(p2) {}
-  Line(int x1, int y1, int x2, int y2) : p1_(x1, y1), p2_(x2, y2) {}
-  Line(const std::array<int, 4> &arr)
-      : p1_(arr[0], arr[1]), p2_(arr[2], arr[3]) {}
+  // CONSTUCTORS
+  Line(int x1, int y1, int x2, int y2) : p1_(x1, y1), p2_(x2, y2) {
+    if (p1_ == p2_) {
+      throw std::runtime_error(
+          "TODO: line must have different origin from end");
+    }
+  }
+
+  Line() : Line(0, 0, 1, 1) {}
+
+  Line(const Point &p1, const Point &p2)
+      : Line(p1.x(), p1.y(), p2.x(), p2.y()) {}
+
+  Line(const std::array<int, 4> &arr) : Line(arr[0], arr[1], arr[2], arr[3]) {}
 };
