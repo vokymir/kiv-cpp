@@ -17,6 +17,7 @@ public:
   std::string draw_svg() override;
   std::string draw_pgm() override;
 
+  Line() {}
   Line(const Point &p1, const Point &p2) : p1_(p1), p2_(p2) {}
   Line(int x1, int y1, int x2, int y2) : p1_(x1, y1), p2_(x2, y2) {}
   Line(const std::array<int, 4> &arr)
