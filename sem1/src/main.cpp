@@ -4,7 +4,6 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
-#include <sstream>
 #include <string>
 
 int main(int argc, char **argv) {
@@ -38,30 +37,6 @@ int main(int argc, char **argv) {
   }
 
   Parser::parse_file(source_file, canvas);
-
-  std::string line;
-  while (std::getline(source_file, line)) {
-    std::istringstream iss(line);
-
-    std::string token;
-    iss >> token;
-
-    if (token == "line") {
-      std::cout << "L" << std::endl;
-    } else if (token == "circle") {
-      std::cout << "C" << std::endl;
-    } else if (token == "rect") {
-      std::cout << "R" << std::endl;
-    } else if (token == "translate") {
-      std::cout << "TRANS" << std::endl;
-    } else if (token == "rotate") {
-      std::cout << "ROTAT" << std::endl;
-    } else if (token == "scale") {
-      std::cout << "SCALE" << std::endl;
-    } else {
-      std::cout << "WEIRD_LINE" << std::endl;
-    }
-  }
 
   return 0;
 }
