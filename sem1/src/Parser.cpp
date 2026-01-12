@@ -1,8 +1,10 @@
 
 #include "Parser.hpp"
 #include "Canvas.hpp"
+#include "Line.hpp"
 #include "Point.hpp"
 #include <iostream>
+#include <memory>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -41,6 +43,10 @@ void Parser::parse_file(std::ifstream &f, Canvas &c) {
 }
 
 void Parser::parse_line_cmd(std::istringstream &iss, Canvas &c) {
-  Point p1{};
-  Point p2{};
+  int arr[4];
+  for (int i = 0; i < 4; i++) {
+    read_token(iss, arr[i]);
+  }
+
+  c.add_shape(std::make_unique<Line>(arr));
 }
