@@ -139,13 +139,14 @@ void I_O::write(const Canvas &canvas, std::filesystem::path &target) {
     throw std::runtime_error("Cannot write to output file");
   }
 
-  if (target.extension() == "svg") {
+  if (target.extension() == ".svg") {
     target_file << canvas.draw_svg();
 
-  } else if (target.extension() == "pgm") {
+  } else if (target.extension() == ".pgm") {
     target_file << canvas.draw_pgm();
 
   } else {
-    throw std::runtime_error("Unsupported output file extension");
+    throw std::runtime_error("Unsupported output file extension (" +
+                             target.extension().string() + ").");
   }
 }
