@@ -1,17 +1,20 @@
 
 #include "Canvas.hpp"
 #include "I_O.hpp"
-#include "Util.hpp"
 #include <exception>
 #include <filesystem>
 #include <iostream>
+#include <stdexcept>
+
+void load_args(int argc, char **argv, std::filesystem::path &source,
+               std::filesystem::path &target, int &width, int &height);
 
 int main(int argc, char **argv) {
   std::filesystem::path source, target;
   int width, height, read_lines;
 
   try {
-    Util::load_args(argc, argv, source, target, width, height);
+    load_args(argc, argv, source, target, width, height);
     Canvas canvas(width, height);
 
     read_lines = I_O::parse_file(source, canvas);
@@ -26,4 +29,25 @@ int main(int argc, char **argv) {
 
   std::cout << "OK\n" << read_lines << std::endl;
   return 0;
+}
+
+void load_args(int argc, char **argv, std::filesystem::path &source,
+               std::filesystem::path &target, int &width, int &height) {
+  if (argc < 4) {
+    throw std::runtime_error(
+        "Usage:\n ./drawing.exe <input_file> <output_file> <width>x<height>");
+  }
+
+  source = argv[1];
+  target = argv[2];
+
+  std::string size{argv[3]};
+
+  auto pos = size.find('x');
+  if (pos == std::string::npos) {
+    throw std::runtime_error("TODO: expected <w>x<h>");
+  }
+
+  width = std::stoi(size.substr(0, pos));
+  height = std::stoi(size.substr(pos + 1));
 }
