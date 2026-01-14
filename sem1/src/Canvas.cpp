@@ -1,5 +1,6 @@
 #include "Canvas.hpp"
 #include "Shape.hpp"
+#include <format>
 #include <memory>
 #include <stdexcept>
 #include <string>
@@ -41,13 +42,18 @@ void Canvas::add_shape(std::unique_ptr<Shape> s) {
 std::string Canvas::draw_svg() {
   std::string output;
 
-  // TODO: init the svg string
+  output += std::format(R"(<?xml version="1.0" encoding="UTF-8"?>
+<svg width="{}" height="{}"
+     viewBox="0 0 {} {}"
+     xmlns="http://www.w3.org/2000/svg">
+)",
+                        width_, height_, width_, height_);
 
   for (const auto &shape : shapes_) {
     output += shape->draw_svg();
   }
 
-  // TODO: end the svg string
+  output += "\n</svg>\n";
 
   return output;
 }
