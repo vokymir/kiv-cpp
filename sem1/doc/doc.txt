@@ -1,3 +1,11 @@
+Standardni build + spusteni (linux):
+- build:
+mkdir -p build
+cmake -S . -B build
+cmake --build build
+- run
+./bin/drawing.exe ...
+
 Moznosti vylepseni:
 - udrzovat souradnice v realnych cislech, nejen integerech
 -- nedelal jsem, protoze mi to prislo jako jenom maly rozdil pro dany projekt, ale muzu kdykoliv upravit, neni to slozite
