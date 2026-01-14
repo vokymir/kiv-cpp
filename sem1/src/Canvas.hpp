@@ -8,7 +8,11 @@
 // Canvas to which any Shape could be added.
 // If any transformation is performed, its effects are applied only to currently
 // existing Shapes. Newly added Shapes will be added into new "coordinates
-// system".
+// system". Imagine it as if there is a transparent paper; if a transformation
+// is performed, the paper is moved/rotated/scaled and new paper is put on top
+// of it in the original place. Newly added shapes are put onto the new paper.
+// If another transformation is performed, you do it with all the papers in the
+// stack.
 class Canvas {
 private:
   int width_;
@@ -36,11 +40,15 @@ public:
 
   // SHAPES
 
-  // Add any shape to the canvas.
+  // Add any shape to the canvas. The shape is added to the default coordinate
+  // space, ie. the position (0,0) is the same (for adding shape) no matter how
+  // many transformations were performed.
   void add_shape(std::unique_ptr<Shape> s);
 
   // DRAW
 
+  // Return valid SVG string which contains all shapes currently stored.
   std::string draw_svg() const;
+  // Return valid PGM string which contains all shapes currently stored.
   std::string draw_pgm() const;
 };
