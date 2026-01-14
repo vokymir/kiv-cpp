@@ -49,6 +49,7 @@ int I_O::parse_file(const std::filesystem::path &source, Canvas &c) {
   std::string row;
   int n_rows = 0;
 
+  // process all lines & count valid ones
   while (std::getline(file, row)) {
     if (parse_row(row, c)) {
       n_rows++;
