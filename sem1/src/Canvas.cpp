@@ -41,13 +41,13 @@ void Canvas::add_shape(std::unique_ptr<Shape> s) {
 std::string Canvas::draw_svg() {
   std::string output;
 
-  // init the svg string
+  // TODO: init the svg string
 
   for (const auto &shape : shapes_) {
     output += shape->draw_svg();
   }
 
-  // end the svg string
+  // TODO: end the svg string
 
   return output;
 }
@@ -55,13 +55,13 @@ std::string Canvas::draw_svg() {
 std::string Canvas::draw_pgm() {
   std::string output;
 
-  // init the pgm string
+  // TODO: init the pgm string
 
   for (const auto &shape : shapes_) {
     output += shape->draw_pgm();
   }
 
-  // end the pgm string
+  // TODO: end the pgm string
 
   return output;
 }
