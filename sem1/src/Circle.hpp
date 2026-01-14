@@ -6,8 +6,8 @@
 
 class Circle : public Shape {
 private:
-  Point p1_;
-  float r_ = 1;
+  Point center_;
+  float radius_ = 1;
 
 public:
   void translate(int x, int y) override;
@@ -19,8 +19,8 @@ public:
 
 public:
   // CONSTRUCTORS
-  Circle(int x, int y, float r) : p1_(x, y), r_(r) {
-    if (r_ <= 0) {
+  Circle(int x, int y, float r) : center_(x, y), radius_(r) {
+    if (radius_ <= 0) {
       throw std::runtime_error("TODO: radius must be > 0");
     }
   }
