@@ -27,18 +27,21 @@ void Line::draw_svg(std::string &svg) const {
 }
 
 void Line::draw_pgm(std::vector<std::vector<int>> &pixels) const {
-  // Bresenham
-  int x0 = p1_.x(), y0 = p1_.y();
+  // static variables
+  int x0 = p1_.x(), y0 = p1_.y(); // (this one is dynamic)
   int x1 = p2_.x(), y1 = p2_.y();
-
-  int dx = std::abs(x1 - x0);
-  int dy = -std::abs(y1 - y0);
+  int width = pixels[0].size();
+  int height = pixels.size();
   int sx = x0 < x1 ? 1 : -1;
   int sy = y0 < y1 ? 1 : -1;
+
+  // dynamic variables
+  int dx = std::abs(x1 - x0);
+  int dy = -std::abs(y1 - y0);
   int err = dx + dy;
 
   while (true) {
-    if (y0 >= 0 && y0 < pixels.size() && x0 >= 0 && x0 < pixels[0].size())
+    if (y0 >= 0 && y0 < height && x0 >= 0 && x0 < width)
       pixels[y0][x0] = 0; // black pixel
 
     if (x0 == x1 && y0 == y1)

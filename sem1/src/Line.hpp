@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 
+// Specific shape - defined by two points.
 class Line : public Shape {
 private:
   Point p1_;
@@ -17,10 +18,14 @@ public:
   void rotate(int x, int y, float a) override;
   void scale(int x, int y, float f) override;
 
+  // Append standard line tag to the svg.
   void draw_svg(std::string &svg) const override;
+  // Draw pure black line to "2D array" using Bresenham.
   void draw_pgm(std::vector<std::vector<int>> &pixels) const override;
 
   // CONSTUCTORS
+
+  // Create new line from two points. Beware, the points must not be identical.
   Line(int x1, int y1, int x2, int y2) : p1_(x1, y1), p2_(x2, y2) {
     if (p1_ == p2_) {
       throw std::runtime_error(
