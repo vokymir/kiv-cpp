@@ -11,11 +11,14 @@ void Point::translate(int x, int y) {
 }
 
 void Point::rotate(int x, int y, float a) {
+  // difference: point - origin of rotation
   int dx = x_ - x;
   int dy = y_ - y;
 
+  // convert a [degree] to angle [rad]
   float angle = a * std::numbers::pi / 180.0f;
 
+  // based on this: https://en.wikipedia.org/wiki/Rotation_matrix
   float new_x = dx * std::cos(angle) - dy * std::sin(angle);
   float new_y = dx * std::sin(angle) + dy * std::cos(angle);
 
