@@ -40,37 +40,42 @@ void Canvas::add_shape(std::unique_ptr<Shape> s) {
 }
 
 std::string Canvas::draw_svg() {
-  std::string output;
-
-  output +=
+  // SVG header
+  std::string output =
       std::format(R"(<svg width="{}" height="{}" style="background-color:white">
 )",
                   width_, height_);
 
+  // draw every shape on canvas
   for (const auto &shape : shapes_) {
-    output += shape->draw_svg();
+    shape->draw_svg(output);
   }
 
+  // SVG footer
   output += "\n</svg>\n";
 
   return output;
 }
 
 std::string Canvas::draw_pgm() {
+  // PGM header
   std::string output = std::format("P2\n{} {}\n255\n", width_, height_);
 
+  // draw every shape on white canvas
   std::vector<std::vector<int>> pixels(height_, std::vector<int>(width_, 255));
-
   for (const auto &shape : shapes_) {
     shape->draw_pgm(pixels);
   }
 
+  // transform 2D image to string
   for (int y = 0; y < height_; ++y) {
     for (int x = 0; x < width_; ++x) {
       output += std::to_string(pixels[y][x]) + " ";
     }
     output += "\n";
   }
+
+  // NO PGM footer
 
   return output;
 }

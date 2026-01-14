@@ -19,8 +19,8 @@ void Line::scale(int x, int y, float f) {
   p2_.scale(x, y, f);
 }
 
-std::string Line::draw_svg() const {
-  return std::format(
+void Line::draw_svg(std::string &svg) const {
+  svg += std::format(
       R"(<line x1="{}" y1="{}" x2="{}" y2="{}" stroke="black" stroke-width="2" />
 )",
       p1_.x(), p1_.y(), p2_.x(), p2_.y());

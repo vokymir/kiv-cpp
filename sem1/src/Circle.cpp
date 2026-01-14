@@ -14,8 +14,8 @@ void Circle::scale(int x, int y, float f) {
   radius_ *= f;
 }
 
-std::string Circle::draw_svg() const {
-  return std::format(
+void Circle::draw_svg(std::string &svg) const {
+  svg += std::format(
       R"(<circle cx="{}" cy="{}" r="{}" stroke="black" stroke-width="2" fill="none" />
 )",
       center_.x(), center_.y(), radius_);

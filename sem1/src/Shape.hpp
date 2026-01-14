@@ -17,7 +17,7 @@ public:
   // f is not-zero scale factor
   virtual void scale(int x, int y, float f) = 0;
 
-  virtual std::string draw_svg() const = 0;
+  virtual void draw_svg(std::string &svg) const = 0;
   virtual void draw_pgm(std::vector<std::vector<int>> &pixels) const = 0;
 
   // base-class stuff

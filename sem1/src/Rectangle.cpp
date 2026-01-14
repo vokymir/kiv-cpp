@@ -26,20 +26,11 @@ void Rectangle::scale(int x, int y, float f) {
   D_.scale(x, y, f);
 }
 
-std::string Rectangle::draw_svg() const {
-  std::string output;
-
-  // just to satisfy the lambda requirement
-  auto draw_line = [](const Point &begin, const Point &end) {
-    return Line(begin, end).draw_svg();
-  };
-
-  output += draw_line(A_, B_);
-  output += draw_line(B_, C_);
-  output += draw_line(C_, D_);
-  output += draw_line(D_, A_);
-
-  return output;
+void Rectangle::draw_svg(std::string &svg) const {
+  Line(A_, B_).draw_svg(svg);
+  Line(B_, C_).draw_svg(svg);
+  Line(C_, D_).draw_svg(svg);
+  Line(D_, A_).draw_svg(svg);
 }
 
 void Rectangle::draw_pgm(std::vector<std::vector<int>> &pixels) const {

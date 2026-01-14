@@ -3,6 +3,7 @@
 #include "Point.hpp"
 #include "Shape.hpp"
 #include <stdexcept>
+#include <string>
 
 //  Class for any rectangle.
 //  D ----- C
@@ -20,7 +21,7 @@ public:
   void rotate(int x, int y, float a) override;
   void scale(int x, int y, float f) override;
 
-  std::string draw_svg() const override;
+  void draw_svg(std::string &svg) const override;
   void draw_pgm(std::vector<std::vector<int>> &pixels) const override;
 
 public:

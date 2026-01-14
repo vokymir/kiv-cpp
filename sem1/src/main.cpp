@@ -38,7 +38,7 @@ int main(int argc, char **argv) {
 
   Parser::parse_file(source_file, canvas);
 
-  std::cout << canvas.draw_svg() << std::endl;
+  std::cout << canvas.draw_pgm() << std::endl;
 
   return 0;
 }
