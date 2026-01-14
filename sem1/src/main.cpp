@@ -56,6 +56,11 @@ void load_args(int argc, const char **argv, std::filesystem::path &source,
     throw std::runtime_error("Expected canvas size in format <width>x<height>");
   }
 
-  width = std::stoi(size.substr(0, pos));
-  height = std::stoi(size.substr(pos + 1));
+  try {
+    width = std::stoi(size.substr(0, pos));
+    height = std::stoi(size.substr(pos + 1));
+  } catch (...) {
+    throw std::runtime_error(
+        "Check your dimensions, couldn't convert to integers.");
+  }
 }
