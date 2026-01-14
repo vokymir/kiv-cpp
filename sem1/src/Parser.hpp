@@ -10,9 +10,11 @@ class Parser {
 private:
   // Return true if there was a valid statement, not only comment.
   static bool parse_row(const std::string &row, Canvas &c);
+
   static void parse_line_cmd(std::istringstream &iss, Canvas &c);
   static void parse_circle_cmd(std::istringstream &iss, Canvas &c);
   static void parse_rect_cmd(std::istringstream &iss, Canvas &c);
+
   static void parse_translate_cmd(std::istringstream &iss, Canvas &c);
   static void parse_rotate_cmd(std::istringstream &iss, Canvas &c);
   static void parse_scale_cmd(std::istringstream &iss, Canvas &c);

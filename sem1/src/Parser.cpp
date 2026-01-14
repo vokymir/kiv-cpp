@@ -85,3 +85,34 @@ void Parser::parse_rect_cmd(std::istringstream &iss, Canvas &c) {
 
   c.add_shape(std::make_unique<Rectangle>(x, y, w, h));
 }
+
+void Parser::parse_translate_cmd(std::istringstream &iss, Canvas &c) {
+  int x, y;
+
+  read_token(iss, x);
+  read_token(iss, y);
+
+  c.translate(x, y);
+}
+
+void Parser::parse_rotate_cmd(std::istringstream &iss, Canvas &c) {
+  int x, y;
+  float a;
+
+  read_token(iss, x);
+  read_token(iss, y);
+  read_token(iss, a);
+
+  c.rotate(x, y, a);
+}
+
+void Parser::parse_scale_cmd(std::istringstream &iss, Canvas &c) {
+  int x, y;
+  float f;
+
+  read_token(iss, x);
+  read_token(iss, y);
+  read_token(iss, f);
+
+  c.scale(x, y, f);
+}
