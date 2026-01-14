@@ -1,5 +1,6 @@
 
 #include "Circle.hpp"
+#include <format>
 #include <string>
 
 void Circle::translate(int x, int y) { center_.translate(x, y); }
@@ -12,6 +13,9 @@ void Circle::scale(int x, int y, float f) {
   radius_ *= f;
 }
 
-std::string Circle::draw_svg() { return "SVG CIRCLE"; }
+std::string Circle::draw_svg() {
+  return std::format(R"(<circle cx="{}" cy="{}" r="{}" />\n)", center_.x(),
+                     center_.y(), radius_);
+}
 
 std::string Circle::draw_pgm() { return "PGM CIRCLE"; }
