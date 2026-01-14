@@ -1,0 +1,38 @@
+Moznosti vylepseni:
+- udrzovat souradnice v realnych cislech, nejen integerech
+-- nedelal jsem, protoze mi to prislo jako jenom maly rozdil pro dany projekt, ale muzu kdykoliv upravit, neni to slozite
+- misto float pouzivat double
+-- nejspis overkill pro dany projekt
+
+Struktura:
+- main: vstupni bod, abstraktne cely program
+- util: nezaraditelne pomocne funkce
+- io: canvas-related funkce pro cteni a zapis souboru
+- point: pomocna trida pro body na 2D canvas - backbone vsech transformaci
+- canvas: platno, na ktere se kresli tvary
+- shape: abstraktni trida pro vsechny tvary
+-- line: cara (definovana pomoci 2 bodu)
+-- circle: kruznice (def. pomoci bodu a polomeru)
+-- rectangle: obdelnik (def. pomoci 4 bodu)
+
+Program-flow:
+main: read args
+io: read input file
+    (some) shape: add to canvas
+    canvas: prida tvar
+    ...
+io: write to file (podle pripony)
+    canvas: vykresli se tvare
+    (some) shape: vykresli se
+    ...
+    canvas: -> preda hotovy string, ktery se uklada
+main: return
+
+Poznamky:
+- temer vsechna logika na transformace je ukryta v bodu (trida Point),
+v objektech se akorat vola nad prislusnymi body (kruznice ma navic polomer)
+- obdelnik se prevede na 4 body, aby to bylo cely jednoduchy pri otaceni platna,
+dal by se jednoduse prevest na obecnejsi polygon
+- prevod do rastru byl narocnejsi nez do vektoru
+- akorat v svg se to bile pozadi neukazuje ve vsech editorech
+--> nasel jsem, ze by slo pridat bily obdelnik jako prvni element, ale to se mi nelibi
