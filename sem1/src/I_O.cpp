@@ -5,6 +5,7 @@
 #include "Line.hpp"
 #include "Rectangle.hpp"
 #include <array>
+#include <exception>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -34,7 +35,7 @@ bool I_O::parse_row(const std::string &row, Canvas &c) {
   } else if (token == "scale") {
     parse_scale_cmd(iss, c);
   } else {
-    throw std::runtime_error("TODO: invalid line in input file");
+    throw std::runtime_error("Invalid command in input file");
   }
 
   return true;
@@ -43,17 +44,28 @@ bool I_O::parse_row(const std::string &row, Canvas &c) {
 int I_O::parse_file(const std::filesystem::path &source, Canvas &c) {
   std::ifstream file{source};
   if (!file) {
-    throw std::runtime_error("Failed to open file for read.");
+    throw std::runtime_error("Cannot open input file");
   }
 
   std::string row;
-  int n_rows = 0;
+  int nth_row = 1; // for error output only
+  int n_rows = 0;  // count valid rows
 
   // process all lines & count valid ones
-  while (std::getline(file, row)) {
-    if (parse_row(row, c)) {
-      n_rows++;
+  try {
+
+    while (std::getline(file, row)) {
+      if (parse_row(row, c)) {
+        n_rows++;
+      }
+      nth_row++;
     }
+
+  } catch (const std::exception &e) {
+    throw std::runtime_error(std::format("Line {}: {}", nth_row, e.what()));
+
+  } catch (...) {
+    throw;
   }
 
   return n_rows;
@@ -124,7 +136,7 @@ void I_O::parse_scale_cmd(std::istringstream &iss, Canvas &c) {
 void I_O::write(const Canvas &canvas, std::filesystem::path &target) {
   std::ofstream target_file{target};
   if (!target_file) {
-    throw std::runtime_error("TODO: cannot write file.");
+    throw std::runtime_error("Cannot write to output file");
   }
 
   if (target.extension() == "svg") {
@@ -134,6 +146,6 @@ void I_O::write(const Canvas &canvas, std::filesystem::path &target) {
     target_file << canvas.draw_pgm();
 
   } else {
-    throw std::runtime_error("TODO: invalid target file extension");
+    throw std::runtime_error("Unsupported output file extension");
   }
 }

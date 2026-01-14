@@ -30,7 +30,7 @@ public:
   // r.
   Circle(int x, int y, float r) : center_(x, y), radius_(r) {
     if (radius_ <= 0) {
-      throw std::runtime_error("TODO: radius must be > 0");
+      throw std::runtime_error("Circle radius must be > 0");
     }
   }
 

@@ -28,8 +28,7 @@ public:
   // Create new line from two points. Beware, the points must not be identical.
   Line(int x1, int y1, int x2, int y2) : p1_(x1, y1), p2_(x2, y2) {
     if (p1_ == p2_) {
-      throw std::runtime_error(
-          "TODO: line must have different origin from end");
+      throw std::runtime_error("Line endpoints must be different");
     }
   }
 

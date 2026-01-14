@@ -7,10 +7,10 @@
 
 Canvas::Canvas(int w, int h) {
   if (w <= 0) {
-    throw std::runtime_error("TODO: canvas w must be >0");
+    throw std::runtime_error("Canvas width must be > 0");
   }
   if (h <= 0) {
-    throw std::runtime_error("TODO: canvas h must be >0");
+    throw std::runtime_error("Canvas height must be > 0");
   }
 
   width_ = w;

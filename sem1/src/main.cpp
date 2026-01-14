@@ -27,9 +27,12 @@ int main(int argc, char **argv) {
     I_O::write(canvas, target);
 
   } catch (const std::exception &e) {
-
     std::cout << e.what() << std::endl;
     return 1;
+
+  } catch (...) {
+    std::cout << "Process ended by unknown exception." << std::endl;
+    return 2;
   }
 
   std::cout << "OK\n" << read_lines << std::endl;
@@ -50,7 +53,7 @@ void load_args(int argc, const char **argv, std::filesystem::path &source,
 
   auto pos = size.find('x');
   if (pos == std::string::npos) {
-    throw std::runtime_error("TODO: expected <w>x<h>");
+    throw std::runtime_error("Expected canvas size in format <width>x<height>");
   }
 
   width = std::stoi(size.substr(0, pos));

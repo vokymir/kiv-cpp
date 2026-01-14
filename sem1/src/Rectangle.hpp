@@ -33,10 +33,10 @@ public:
   // height h. Must have h,w > 0.
   Rectangle(int x, int y, int w, int h) {
     if (w <= 0) {
-      throw std::runtime_error("TODO: rect must have >0 w");
+      throw std::runtime_error("Rectangle width must be > 0");
     }
     if (h <= 0) {
-      throw std::runtime_error("TODO: rect must have >0 h");
+      throw std::runtime_error("Rectangle height must be > 0");
     }
 
     // Console/Image standard coordinates.

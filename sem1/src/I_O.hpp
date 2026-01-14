@@ -72,7 +72,7 @@ private:
 
     // read token, exit if doesn't exist
     if (!(iss >> token) || token.empty()) {
-      throw std::runtime_error("TODO");
+      throw std::runtime_error("Missing or empty token in input");
     }
 
     // handle comment
@@ -84,7 +84,7 @@ private:
     // set out variable
     std::istringstream conv(token);
     if (!(conv >> out)) {
-      throw std::runtime_error("TODO");
+      throw std::runtime_error("Invalid token format");
     }
   }
 };

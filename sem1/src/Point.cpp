@@ -28,7 +28,7 @@ void Point::rotate(int x, int y, float a) {
 
 void Point::scale(int x, int y, float f) {
   if (Util::is_zero(f)) {
-    throw std::runtime_error("TODO: scale factor must != 0");
+    throw std::runtime_error("Scale factor must be nonzero");
   }
 
   x_ = x + (x_ - x) * f;
