@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 
+// Abstract class. Any shape must be able to transform and draw itself.
 class Shape {
 public:
   // Apply translation for x and y.
@@ -17,9 +18,11 @@ public:
   // f is not-zero scale factor
   virtual void scale(int x, int y, float f) = 0;
 
+  // Draw itself in SVG format.
   virtual void draw_svg(std::string &svg) const = 0;
+  // Draw itself in PGM format.
   virtual void draw_pgm(std::vector<std::vector<int>> &pixels) const = 0;
 
-  // base-class stuff
+  // Allow children have different constructors.
   virtual ~Shape() = default;
 };
