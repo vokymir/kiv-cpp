@@ -41,6 +41,6 @@ public:
 
   // DRAW
 
-  std::string draw_svg();
-  std::string draw_pgm();
+  std::string draw_svg() const;
+  std::string draw_pgm() const;
 };

@@ -39,7 +39,7 @@ void Canvas::add_shape(std::unique_ptr<Shape> s) {
   shapes_.push_back(std::move(s));
 }
 
-std::string Canvas::draw_svg() {
+std::string Canvas::draw_svg() const {
   // SVG header
   std::string output =
       std::format(R"(<svg width="{}" height="{}" style="background-color:white">
@@ -57,7 +57,7 @@ std::string Canvas::draw_svg() {
   return output;
 }
 
-std::string Canvas::draw_pgm() {
+std::string Canvas::draw_pgm() const {
   // PGM header
   std::string output = std::format("P2\n{} {}\n255\n", width_, height_);
 

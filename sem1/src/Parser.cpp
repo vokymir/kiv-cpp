@@ -5,6 +5,8 @@
 #include "Line.hpp"
 #include "Rectangle.hpp"
 #include <array>
+#include <filesystem>
+#include <fstream>
 #include <iostream>
 #include <memory>
 #include <sstream>
@@ -38,15 +40,16 @@ bool Parser::parse_row(const std::string &row, Canvas &c) {
   return true;
 }
 
-int Parser::parse_file(std::ifstream &f, Canvas &c) {
-  if (!f) {
+int Parser::parse_file(const std::filesystem::path &source, Canvas &c) {
+  std::ifstream file{source};
+  if (!file) {
     throw std::runtime_error("Failed to open file for read.");
   }
 
   std::string row;
   int n_rows = 0;
 
-  while (std::getline(f, row)) {
+  while (std::getline(file, row)) {
     if (parse_row(row, c)) {
       n_rows++;
     }

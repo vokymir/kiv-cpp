@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Canvas.hpp"
-#include <fstream>
+#include <filesystem>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -22,7 +22,7 @@ private:
 public:
   // Parse given source file from begin to end, line-by-line. Perform found
   // operations on given canvas. Return number of successfully parsed rows.
-  static int parse_file(std::ifstream &f, Canvas &c);
+  static int parse_file(const std::filesystem::path &source, Canvas &c);
 
 private:
   // template
