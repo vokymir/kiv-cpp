@@ -1,7 +1,9 @@
 #pragma once
 
+#include "Util.hpp"
 #include <cmath>
 #include <numbers>
+#include <stdexcept>
 class Point {
 private:
   int x_;
@@ -49,6 +51,9 @@ public:
   }
 
   void scale(int x, int y, float f) {
+    if (Util::is_zero(f)) {
+      throw std::runtime_error("TODO: scale factor must != 0");
+    }
     translate(-x, -y);
 
     x_ = static_cast<int>(std::round(x_ * f));
