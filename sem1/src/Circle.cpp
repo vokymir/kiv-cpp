@@ -21,14 +21,15 @@ void Circle::draw_svg(std::string &svg) const {
       center_.x(), center_.y(), radius_);
 }
 
-// midpoint circle
 void Circle::draw_pgm(std::vector<std::vector<int>> &pixels) const {
+  // static variables
   int cx = center_.x();
   int cy = center_.y();
   int r = radius_;
   int width = pixels[0].size();
   int height = pixels.size();
 
+  // dynamic variables
   int x = r;
   int y = 0;
   int err = 0;
@@ -39,7 +40,7 @@ void Circle::draw_pgm(std::vector<std::vector<int>> &pixels) const {
         pixels[py][px] = 0; // black
     };
 
-    // 8way symmetry
+    // 8- symmetry
     plot(cx + x, cy + y);
     plot(cx + x, cy - y);
 
