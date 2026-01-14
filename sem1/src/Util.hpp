@@ -1,9 +1,7 @@
 #pragma once
 
-#include "Canvas.hpp"
 #include <cmath>
 #include <filesystem>
-#include <fstream>
 #include <stdexcept>
 
 class Util {
@@ -33,22 +31,5 @@ public:
 
     width = std::stoi(size.substr(0, pos));
     height = std::stoi(size.substr(pos + 1));
-  }
-
-  static void write(const Canvas &canvas, std::filesystem::path &target) {
-    std::ofstream target_file{target};
-    if (!target_file) {
-      throw std::runtime_error("TODO: cannot write file.");
-    }
-
-    if (target.extension() == "svg") {
-      target_file << canvas.draw_svg();
-
-    } else if (target.extension() == "pgm") {
-      target_file << canvas.draw_pgm();
-
-    } else {
-      throw std::runtime_error("TODO: invalid target file extension");
-    }
   }
 };

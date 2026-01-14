@@ -6,7 +6,12 @@
 #include <stdexcept>
 #include <string>
 
-class Parser {
+// Class for every input/output operation related to canvas.
+// Main functionality:
+// + parse source file & update canvas accordingly
+// - write existing canvas to target file
+class I_O {
+  // INPUT
 private:
   // Return true if there was a valid statement, not only comment.
   static bool parse_row(const std::string &row, Canvas &c);
@@ -24,9 +29,12 @@ public:
   // operations on given canvas. Return number of successfully parsed rows.
   static int parse_file(const std::filesystem::path &source, Canvas &c);
 
-private:
-  // template
+  // OUTPUT
+public:
+  static void write(const Canvas &canvas, std::filesystem::path &target);
 
+  // INPUT (template)
+private:
   template <typename T>
   static void read_token(std::istringstream &iss, T &out) {
     std::string token;

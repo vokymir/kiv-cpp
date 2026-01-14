@@ -1,5 +1,5 @@
 
-#include "Parser.hpp"
+#include "I_O.hpp"
 #include "Canvas.hpp"
 #include "Circle.hpp"
 #include "Line.hpp"
@@ -13,7 +13,7 @@
 #include <stdexcept>
 #include <string>
 
-bool Parser::parse_row(const std::string &row, Canvas &c) {
+bool I_O::parse_row(const std::string &row, Canvas &c) {
   std::istringstream iss(row);
   std::string token;
 
@@ -40,7 +40,7 @@ bool Parser::parse_row(const std::string &row, Canvas &c) {
   return true;
 }
 
-int Parser::parse_file(const std::filesystem::path &source, Canvas &c) {
+int I_O::parse_file(const std::filesystem::path &source, Canvas &c) {
   std::ifstream file{source};
   if (!file) {
     throw std::runtime_error("Failed to open file for read.");
@@ -58,7 +58,7 @@ int Parser::parse_file(const std::filesystem::path &source, Canvas &c) {
   return n_rows;
 }
 
-void Parser::parse_line_cmd(std::istringstream &iss, Canvas &c) {
+void I_O::parse_line_cmd(std::istringstream &iss, Canvas &c) {
   std::array<int, 4> arr;
   for (int i = 0; i < 4; i++) {
     read_token(iss, arr[i]);
@@ -67,7 +67,7 @@ void Parser::parse_line_cmd(std::istringstream &iss, Canvas &c) {
   c.add_shape(std::make_unique<Line>(arr));
 }
 
-void Parser::parse_circle_cmd(std::istringstream &iss, Canvas &c) {
+void I_O::parse_circle_cmd(std::istringstream &iss, Canvas &c) {
   int x, y;
   float r;
 
@@ -78,7 +78,7 @@ void Parser::parse_circle_cmd(std::istringstream &iss, Canvas &c) {
   c.add_shape(std::make_unique<Circle>(x, y, r));
 }
 
-void Parser::parse_rect_cmd(std::istringstream &iss, Canvas &c) {
+void I_O::parse_rect_cmd(std::istringstream &iss, Canvas &c) {
   int x, y, w, h;
 
   read_token(iss, x);
@@ -89,7 +89,7 @@ void Parser::parse_rect_cmd(std::istringstream &iss, Canvas &c) {
   c.add_shape(std::make_unique<Rectangle>(x, y, w, h));
 }
 
-void Parser::parse_translate_cmd(std::istringstream &iss, Canvas &c) {
+void I_O::parse_translate_cmd(std::istringstream &iss, Canvas &c) {
   int x, y;
 
   read_token(iss, x);
@@ -98,7 +98,7 @@ void Parser::parse_translate_cmd(std::istringstream &iss, Canvas &c) {
   c.translate(x, y);
 }
 
-void Parser::parse_rotate_cmd(std::istringstream &iss, Canvas &c) {
+void I_O::parse_rotate_cmd(std::istringstream &iss, Canvas &c) {
   int x, y;
   float a;
 
@@ -109,7 +109,7 @@ void Parser::parse_rotate_cmd(std::istringstream &iss, Canvas &c) {
   c.rotate(x, y, a);
 }
 
-void Parser::parse_scale_cmd(std::istringstream &iss, Canvas &c) {
+void I_O::parse_scale_cmd(std::istringstream &iss, Canvas &c) {
   int x, y;
   float f;
 
@@ -118,4 +118,21 @@ void Parser::parse_scale_cmd(std::istringstream &iss, Canvas &c) {
   read_token(iss, f);
 
   c.scale(x, y, f);
+}
+
+void I_O::write(const Canvas &canvas, std::filesystem::path &target) {
+  std::ofstream target_file{target};
+  if (!target_file) {
+    throw std::runtime_error("TODO: cannot write file.");
+  }
+
+  if (target.extension() == "svg") {
+    target_file << canvas.draw_svg();
+
+  } else if (target.extension() == "pgm") {
+    target_file << canvas.draw_pgm();
+
+  } else {
+    throw std::runtime_error("TODO: invalid target file extension");
+  }
 }

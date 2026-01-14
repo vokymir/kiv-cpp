@@ -1,6 +1,6 @@
 
 #include "Canvas.hpp"
-#include "Parser.hpp"
+#include "I_O.hpp"
 #include "Util.hpp"
 #include <exception>
 #include <filesystem>
@@ -14,9 +14,9 @@ int main(int argc, char **argv) {
     Util::load_args(argc, argv, source, target, width, height);
     Canvas canvas(width, height);
 
-    read_lines = Parser::parse_file(source, canvas);
+    read_lines = I_O::parse_file(source, canvas);
 
-    Util::write(canvas, target);
+    I_O::write(canvas, target);
 
   } catch (const std::exception &e) {
 
