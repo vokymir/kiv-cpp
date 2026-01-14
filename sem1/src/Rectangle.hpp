@@ -33,9 +33,12 @@ public:
       throw std::runtime_error("TODO: rect must have >0 h");
     }
 
-    A_.set(x, y - h);
-    B_.set(x + w, y - h);
-    C_.set(x + w, y);
-    D_.set(x, y);
+    // (0,0) -- x
+    // |
+    // y
+    A_.set(x, y);
+    B_.set(x + w, y);
+    C_.set(x + w, y + h);
+    D_.set(x, y + h);
   }
 };
