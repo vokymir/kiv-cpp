@@ -6,19 +6,24 @@
 #include <iostream>
 #include <stdexcept>
 
-void load_args(int argc, char **argv, std::filesystem::path &source,
+// Load all args into according variables, throw if argc < 4 or bad (incorrect)
+// args.
+void load_args(int argc, const char **argv, std::filesystem::path &source,
                std::filesystem::path &target, int &width, int &height);
 
+// Entry point to app. Depending on args will draw SVG or PGM into desired file.
+// If everything OK, will write OK and number of processed lines. If any error,
+// write the error and return with 1.
 int main(int argc, char **argv) {
   std::filesystem::path source, target;
   int width, height, read_lines;
 
   try {
-    load_args(argc, argv, source, target, width, height);
+    load_args(argc, const_cast<const char **>(argv), source, target, width,
+              height);
     Canvas canvas(width, height);
 
     read_lines = I_O::parse_file(source, canvas);
-
     I_O::write(canvas, target);
 
   } catch (const std::exception &e) {
@@ -31,7 +36,7 @@ int main(int argc, char **argv) {
   return 0;
 }
 
-void load_args(int argc, char **argv, std::filesystem::path &source,
+void load_args(int argc, const char **argv, std::filesystem::path &source,
                std::filesystem::path &target, int &width, int &height) {
   if (argc < 4) {
     throw std::runtime_error(
