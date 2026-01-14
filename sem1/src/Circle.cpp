@@ -14,8 +14,10 @@ void Circle::scale(int x, int y, float f) {
 }
 
 std::string Circle::draw_svg() {
-  return std::format(R"(<circle cx="{}" cy="{}" r="{}" />\n)", center_.x(),
-                     center_.y(), radius_);
+  return std::format(
+      R"(<circle cx="{}" cy="{}" r="{}" stroke="black" stroke-width="2" />
+)",
+      center_.x(), center_.y(), radius_);
 }
 
 std::string Circle::draw_pgm() { return "PGM CIRCLE"; }

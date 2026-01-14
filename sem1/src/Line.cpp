@@ -20,7 +20,8 @@ void Line::scale(int x, int y, float f) {
 
 std::string Line::draw_svg() {
   return std::format(
-      R"(<line x1="{}" y1="{}" x2="{}" y2="{}" stroke="black" />\n)", p1_.x(),
-      p1_.y(), p2_.x(), p2_.y());
+      R"(<line x1="{}" y1="{}" x2="{}" y2="{}" stroke="black" stroke-width="2" />
+)",
+      p1_.x(), p1_.y(), p2_.x(), p2_.y());
 }
 std::string Line::draw_pgm() { return "pgm"; }

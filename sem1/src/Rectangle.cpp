@@ -30,7 +30,8 @@ std::string Rectangle::draw_svg() {
 
   auto draw_line = [](const Point &begin, const Point &end) {
     return std::format(
-        R"(<line x1="{}" y1="{}" x2="{}" y2="{}" stroke="black" />\n)",
+        R"(<line x1="{}" y1="{}" x2="{}" y2="{}" stroke="black" stroke-width="2" />
+)",
         begin.x(), begin.y(), end.x(), end.y());
   };
 
