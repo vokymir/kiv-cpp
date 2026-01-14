@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 class Shape {
 public:
@@ -16,8 +17,8 @@ public:
   // f is not-zero scale factor
   virtual void scale(int x, int y, float f) = 0;
 
-  virtual std::string draw_svg() = 0;
-  virtual std::string draw_pgm() = 0;
+  virtual std::string draw_svg() const = 0;
+  virtual void draw_pgm(std::vector<std::vector<int>> &pixels) const = 0;
 
   // base-class stuff
   virtual ~Shape() = default;

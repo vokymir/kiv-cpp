@@ -42,12 +42,10 @@ void Canvas::add_shape(std::unique_ptr<Shape> s) {
 std::string Canvas::draw_svg() {
   std::string output;
 
-  output += std::format(R"(<?xml version="1.0" encoding="UTF-8"?>
-<svg width="{}" height="{}"
-     viewBox="0 0 {} {}"
-     xmlns="http://www.w3.org/2000/svg">
+  output +=
+      std::format(R"(<svg width="{}" height="{}" style="background-color:white">
 )",
-                        width_, height_, width_, height_);
+                  width_, height_);
 
   for (const auto &shape : shapes_) {
     output += shape->draw_svg();
@@ -59,15 +57,20 @@ std::string Canvas::draw_svg() {
 }
 
 std::string Canvas::draw_pgm() {
-  std::string output;
+  std::string output = std::format("P2\n{} {}\n255\n", width_, height_);
 
-  // TODO: init the pgm string
+  std::vector<std::vector<int>> pixels(height_, std::vector<int>(width_, 255));
 
   for (const auto &shape : shapes_) {
-    output += shape->draw_pgm();
+    shape->draw_pgm(pixels);
   }
 
-  // TODO: end the pgm string
+  for (int y = 0; y < height_; ++y) {
+    for (int x = 0; x < width_; ++x) {
+      output += std::to_string(pixels[y][x]) + " ";
+    }
+    output += "\n";
+  }
 
   return output;
 }

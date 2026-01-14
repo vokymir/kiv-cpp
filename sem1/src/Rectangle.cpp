@@ -1,8 +1,9 @@
 
 #include "Rectangle.hpp"
+#include "Line.hpp"
 #include "Point.hpp"
-#include <format>
 #include <string>
+#include <vector>
 
 void Rectangle::translate(int x, int y) {
   A_.translate(x, y);
@@ -25,14 +26,12 @@ void Rectangle::scale(int x, int y, float f) {
   D_.scale(x, y, f);
 }
 
-std::string Rectangle::draw_svg() {
+std::string Rectangle::draw_svg() const {
   std::string output;
 
+  // just to satisfy the lambda requirement
   auto draw_line = [](const Point &begin, const Point &end) {
-    return std::format(
-        R"(<line x1="{}" y1="{}" x2="{}" y2="{}" stroke="black" stroke-width="2" />
-)",
-        begin.x(), begin.y(), end.x(), end.y());
+    return Line(begin, end).draw_svg();
   };
 
   output += draw_line(A_, B_);
@@ -43,4 +42,9 @@ std::string Rectangle::draw_svg() {
   return output;
 }
 
-std::string Rectangle::draw_pgm() { return "PGM rect"; }
+void Rectangle::draw_pgm(std::vector<std::vector<int>> &pixels) const {
+  Line(A_, B_).draw_pgm(pixels);
+  Line(B_, C_).draw_pgm(pixels);
+  Line(C_, D_).draw_pgm(pixels);
+  Line(D_, A_).draw_pgm(pixels);
+}

@@ -14,8 +14,8 @@ public:
   void rotate(int x, int y, float a) override;
   void scale(int x, int y, float f) override;
 
-  std::string draw_svg() override;
-  std::string draw_pgm() override;
+  std::string draw_svg() const override;
+  void draw_pgm(std::vector<std::vector<int>> &pixels) const override;
 
 public:
   // CONSTRUCTORS

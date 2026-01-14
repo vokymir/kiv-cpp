@@ -4,6 +4,7 @@
 #include "Shape.hpp"
 #include <array>
 #include <stdexcept>
+#include <vector>
 
 class Line : public Shape {
 private:
@@ -15,8 +16,8 @@ public:
   void rotate(int x, int y, float a) override;
   void scale(int x, int y, float f) override;
 
-  std::string draw_svg() override;
-  std::string draw_pgm() override;
+  std::string draw_svg() const override;
+  void draw_pgm(std::vector<std::vector<int>> &pixels) const override;
 
   // CONSTUCTORS
   Line(int x1, int y1, int x2, int y2) : p1_(x1, y1), p2_(x2, y2) {
