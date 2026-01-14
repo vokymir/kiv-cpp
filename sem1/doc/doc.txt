@@ -36,3 +36,7 @@ dal by se jednoduse prevest na obecnejsi polygon
 - prevod do rastru byl narocnejsi nez do vektoru
 - akorat v svg se to bile pozadi neukazuje ve vsech editorech
 --> nasel jsem, ze by slo pridat bily obdelnik jako prvni element, ale to se mi nelibi
+- pri zvetseni velikosti platna na velke cislo (100000x100000) je format PGM nepouzitelny
+-- sebral mi veskerou ramku ale nestacilo to a spadnul
+--> mozne vylepseni: je to sparce matrix, slo by reprezentovat jako zero-run nebo jakseto
+--> proste napsat: 100x nula, pak 2 jednicky, pak 900000x nula, asi tak
