@@ -33,7 +33,7 @@ public:
     if constexpr (PRECISION == Unlimited) {
       bytes_.reserve(4096);
     } else {
-      bytes_.reserve(PRECISION);
+      bytes_.resize(PRECISION);
     }
     // TODO: this is definitely not it
   }
