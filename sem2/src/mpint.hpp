@@ -3,6 +3,7 @@
 #include <concepts>
 #include <cstddef>
 #include <cstdint>
+#include <memory>
 #include <stdexcept>
 #include <string>
 #include <type_traits>
@@ -16,6 +17,25 @@ static constexpr std::size_t Unlimited = 0;
 // concept ensuring MPInt number has valid precision parameter
 template <std::size_t PRECISION>
 concept Valid_MPInt_Precision = (PRECISION >= 4) || PRECISION == Unlimited;
+
+template <std::size_t PRECISION>
+  requires Valid_MPInt_Precision<PRECISION>
+class MPInt;
+
+// specific error for overflowed number. find the precise number as public
+// attribute of error: value
+class Overflow_Error : public std::runtime_error {
+  using MPInt_Unlimited = std::unique_ptr<MPInt<Unlimited>>;
+
+public:
+  MPInt_Unlimited value;
+
+  explicit Overflow_Error(MPInt_Unlimited v)
+      : std::runtime_error("MPInt overflow"), value(std::move(v)) {}
+
+  explicit Overflow_Error(MPInt_Unlimited v, std::string &&msg)
+      : std::runtime_error(std::move(msg)), value(std::move(v)) {}
+};
 
 template <std::size_t PRECISION>
   requires Valid_MPInt_Precision<PRECISION>
@@ -119,8 +139,8 @@ private:
       return;
     }
     if (d.size() > PRECISION) {
-      MPInt<Unlimited> full{d, true};
-      throw Overflow_Error(full, "overflow error: unknown sign");
+      auto full_ptr = std::make_unique<MPInt<Unlimited>>(d, true);
+      throw Overflow_Error(std::move(full_ptr), "overflow error: unknown sign");
     }
   }
 
@@ -131,19 +151,6 @@ private:
     check_overflow(d);
     bytes_ = std::move(d);
   }
-};
-
-// specific error for overflowed number. find the precise number as public
-// attribute of error: value
-class Overflow_Error : public std::runtime_error {
-public:
-  MPInt<Unlimited> value;
-
-  explicit Overflow_Error(MPInt<Unlimited> &&v)
-      : std::runtime_error("MPInt overflow"), value(std::move(v)) {}
-
-  explicit Overflow_Error(MPInt<Unlimited> &&v, std::string &&msg)
-      : std::runtime_error(std::move(msg)), value(std::move(v)) {}
 };
 
 } // namespace MPInt
