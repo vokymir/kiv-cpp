@@ -87,6 +87,46 @@ public:
     set_digits(std::move(tmp));
   }
 
+  MPInt(const std::string &value) {
+    if (value.empty()) {
+      throw std::invalid_argument("Cannot construct MPInt from empty string");
+    }
+
+    // determine sign
+    is_positive_ = true;
+    std::size_t start = 0;
+    if (value[0] == '-') {
+      is_positive_ = false;
+      start = 1;
+    } else if (value[0] == '+') {
+      start = 1;
+    }
+
+    digits_ tmp{0}; // start with 0
+
+    // for all chars inside string
+    for (std::size_t i = start; i < value.size(); ++i) {
+      if (value[i] < '0' || value[i] > '9') {
+        throw std::invalid_argument("Invalid character in MPInt string");
+      }
+      int digit = value[i] - '0';
+
+      // multiply current tmp by 10 and add digit
+      int carry = digit;
+      for (std::size_t j = 0; j < tmp.size(); ++j) {
+        int val = tmp[j] * 10 + carry;
+        tmp[j] = val & 0xFF; // low 8 bits
+        carry = val >> 8;    // carry to next byte
+      }
+      while (carry > 0) {
+        tmp.push_back(carry & 0xFF);
+        carry >>= 8;
+      }
+    }
+
+    set_digits(std::move(tmp));
+  }
+
   // create number from digits and sign - useful in error throwing
   MPInt(digits_ &&d, bool sign) : bytes_(std::move(d)), is_positive_(sign) {}
   // create number from digits and sign - useful in error throwing
