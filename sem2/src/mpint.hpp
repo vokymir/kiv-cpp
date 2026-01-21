@@ -27,10 +27,12 @@ class MPInt;
 // specific error for overflowed number. find the precise number as public
 // attribute of error: value
 class Overflow_Error : public std::runtime_error {
-
+  // incomplete type - that's why raw ptr. tried unique_ptr but there is problem
+  // with unknown destructor.
   using MPInt_Unlimited = MPInt<Unlimited> *;
 
 public:
+  // The overflown value.
   MPInt_Unlimited value;
 
   explicit Overflow_Error(MPInt_Unlimited v)
@@ -39,6 +41,8 @@ public:
   explicit Overflow_Error(MPInt_Unlimited v, std::string &&msg)
       : std::runtime_error(std::move(msg)), value(std::move(v)) {}
 
+  // Destroy the value on Error destruction.
+  // inline (because violated ODR otherwise)
   inline virtual ~Overflow_Error() override;
 };
 
@@ -83,7 +87,9 @@ public:
     set_digits(std::move(tmp));
   }
 
+  // create number from digits and sign - useful in error throwing
   MPInt(digits_ &&d, bool sign) : bytes_(std::move(d)), is_positive_(sign) {}
+  // create number from digits and sign - useful in error throwing
   MPInt(const digits_ &d, bool sign) : bytes_(d), is_positive_(sign) {}
 
   // move, copy
