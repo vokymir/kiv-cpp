@@ -39,7 +39,7 @@ public:
   explicit Overflow_Error(MPInt_Unlimited v, std::string &&msg)
       : std::runtime_error(std::move(msg)), value(std::move(v)) {}
 
-  virtual ~Overflow_Error() override { delete value; };
+  inline virtual ~Overflow_Error() override;
 };
 
 template <std::size_t PRECISION>
@@ -157,5 +157,7 @@ private:
     bytes_ = std::move(d);
   }
 };
+
+inline Overflow_Error::~Overflow_Error() { delete value; }
 
 } // namespace MPInt
