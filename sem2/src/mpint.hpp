@@ -1,9 +1,10 @@
+#pragma once
 
 #include <algorithm>
 #include <concepts>
 #include <cstddef>
 #include <cstdint>
-#include <memory>
+#include <cstdlib>
 #include <stdexcept>
 #include <string>
 #include <type_traits>
@@ -18,14 +19,16 @@ static constexpr std::size_t Unlimited = 0;
 template <std::size_t PRECISION>
 concept Valid_MPInt_Precision = (PRECISION >= 4) || PRECISION == Unlimited;
 
-template <std::size_t PRECISION>
-  requires Valid_MPInt_Precision<PRECISION>
+// forward declaration
+template <std::size_t T>
+  requires Valid_MPInt_Precision<T>
 class MPInt;
 
 // specific error for overflowed number. find the precise number as public
 // attribute of error: value
 class Overflow_Error : public std::runtime_error {
-  using MPInt_Unlimited = std::unique_ptr<MPInt<Unlimited>>;
+
+  using MPInt_Unlimited = MPInt<Unlimited> *;
 
 public:
   MPInt_Unlimited value;
@@ -35,6 +38,8 @@ public:
 
   explicit Overflow_Error(MPInt_Unlimited v, std::string &&msg)
       : std::runtime_error(std::move(msg)), value(std::move(v)) {}
+
+  virtual ~Overflow_Error() override { delete value; };
 };
 
 template <std::size_t PRECISION>
@@ -139,8 +144,8 @@ private:
       return;
     }
     if (d.size() > PRECISION) {
-      auto full_ptr = std::make_unique<MPInt<Unlimited>>(d, true);
-      throw Overflow_Error(std::move(full_ptr), "overflow error: unknown sign");
+      auto full_ptr = new MPInt<Unlimited>(d, true);
+      throw Overflow_Error(full_ptr, "overflow error: unknown sign");
     }
   }
 
