@@ -534,6 +534,88 @@ private:
 
   // ===== Operator overloads =====
 public:
+  // compound operator for adding: keep precision of this MPInt, may throw on
+  // overflow
+  template <std::size_t OTHER_PRECISION>
+  MPInt<PRECISION> &operator+=(const MPInt<OTHER_PRECISION> &rhs) {
+    value_ = MPInt_Value::add(value_, rhs.value_);
+    check_overflow(value_);
+    return *this;
+  }
+
+  // compound operator for subtracting: keep precision of this MPInt, may throw
+  // on overflow
+  template <std::size_t OTHER_PRECISION>
+  MPInt<PRECISION> &operator-=(const MPInt<OTHER_PRECISION> &rhs) {
+    value_ = MPInt_Value::sub(value_, rhs.value_);
+    check_overflow(value_);
+    return *this;
+  }
+
+  // compound operator for multiplication: keep precision of this MPInt, may
+  // throw on overflow
+  template <std::size_t OTHER_PRECISION>
+  MPInt<PRECISION> &operator*=(const MPInt<OTHER_PRECISION> &rhs) {
+    value_ = MPInt_Value::mul(value_, rhs.value_);
+    check_overflow(value_);
+    return *this;
+  }
+
+  // compound operator for division: keep precision of this MPInt, may throw on
+  // overflow
+  template <std::size_t OTHER_PRECISION>
+  MPInt<PRECISION> &operator/=(const MPInt<OTHER_PRECISION> &rhs) {
+    value_ = MPInt_Value::div(value_, rhs.value_);
+    check_overflow(value_);
+    return *this;
+  }
+
+  // helper: decide which precision is higher from given two
+  template <std::size_t A, std::size_t B>
+  static constexpr std::size_t higher_precision =
+      (A == Unlimited || B == Unlimited) ? Unlimited : (A > B ? A : B);
+
+  // operator for adding: keep higher precision, is using += internally
+  template <std::size_t OTHER_PRECISION>
+  MPInt<higher_precision<PRECISION, OTHER_PRECISION>>
+  operator+(const MPInt<OTHER_PRECISION> &other) {
+    MPInt<higher_precision<PRECISION, OTHER_PRECISION>> result(*this);
+    result += other;
+    return result;
+  }
+
+  // operator for subtracting: keep higher precision, is using -= internally
+  template <std::size_t OTHER_PRECISION>
+  MPInt<higher_precision<PRECISION, OTHER_PRECISION>>
+  operator-(const MPInt<OTHER_PRECISION> &other) {
+    MPInt<higher_precision<PRECISION, OTHER_PRECISION>> result(*this);
+    result -= other;
+    return result;
+  }
+
+  // operator for multiplying: keep higher precision, is using *= internally
+  template <std::size_t OTHER_PRECISION>
+  MPInt<higher_precision<PRECISION, OTHER_PRECISION>>
+  operator*(const MPInt<OTHER_PRECISION> &other) {
+    MPInt<higher_precision<PRECISION, OTHER_PRECISION>> result(*this);
+    result *= other;
+    return result;
+  }
+
+  // operator for dividing: keep higher precision, is using /= internally
+  template <std::size_t OTHER_PRECISION>
+  MPInt<higher_precision<PRECISION, OTHER_PRECISION>>
+  operator/(const MPInt<OTHER_PRECISION> &other) {
+    MPInt<higher_precision<PRECISION, OTHER_PRECISION>> result(*this);
+    result /= other;
+    return result;
+  }
+
+  // factorial: keep precision
+  void factorial() {
+    value_ = MPInt_Value::fct(value_);
+    check_overflow(value_);
+  }
 };
 
 // was declared in Overflow_Error, but due to it unknowing the templated class
