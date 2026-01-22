@@ -151,7 +151,7 @@ struct MPInt_Value {
   // === SIGNED ===
 
   // add two MPInt_Values - signed operation.
-  // return new MPInt_Value
+  // return normalized MPInt_Value
   static MPInt_Value add(const MPInt_Value &a, const MPInt_Value &b) {
     MPInt_Value result;
 
@@ -169,11 +169,12 @@ struct MPInt_Value {
       result.is_positive_ = bigger_abs.is_positive_;
     }
 
+    result.normalize();
     return result;
   }
 
   // subtract b from a (signed operation)
-  // return new MPInt_Value
+  // return normalized MPInt_Value
   static MPInt_Value sub(const MPInt_Value &a, const MPInt_Value &b) {
     MPInt_Value result;
     int cmp = cmp_abs(a, b);
@@ -189,24 +190,29 @@ struct MPInt_Value {
       result.is_positive_ = a.is_positive_;
     }
 
+    result.normalize();
     return result;
   }
 
   // multiply two signed values
+  // return normalized product
   static MPInt_Value mul(const MPInt_Value &a, const MPInt_Value &b) {
     MPInt_Value result = mul_abs(a, b);
     // ++ = +, -- = + | +- = -, -+ = -
     result.is_positive_ = (a.is_positive_ == b.is_positive_);
 
+    result.normalize();
     return result;
   }
 
   // divide a by b (signed operation)
+  // return normalized quotient
   static MPInt_Value div(const MPInt_Value &a, const MPInt_Value &b) {
     MPInt_Value result = div_abs(a, b);
     // same logic as in mul
     result.is_positive_ = (a.is_positive_ == b.is_positive_);
 
+    result.normalize();
     return result;
   }
 
@@ -229,13 +235,14 @@ struct MPInt_Value {
       result = MPInt_Value::mul(result, i);
     }
 
+    result.normalize();
     return result;
   }
 
   // === UNSIGNED ===
 
   // add absolute values of two numbers, ignores sign completely
-  // return normalized MPInt_Value
+  // return NOT-normalized MPInt_Value
   static MPInt_Value add_abs(const MPInt_Value &a, const MPInt_Value &b) {
     MPInt_Value result;
 
@@ -264,12 +271,11 @@ struct MPInt_Value {
       result.digits_.push_back(static_cast<std::uint8_t>(carry));
     }
 
-    result.normalize();
     return result;
   }
 
   // subtract the absolute value of b from abs(a). if a < b throw.
-  // return normalized MPInt_Value result
+  // return NOT-normalized MPInt_Value result
   static MPInt_Value sub_abs(const MPInt_Value &a, const MPInt_Value &b) {
     if (MPInt_Value::cmp_abs(a, b) < 0) {
       throw std::domain_error("MPInt_Value::sub_abs(a,b): absolute subtraction "
@@ -303,7 +309,6 @@ struct MPInt_Value {
 
     // borrow will be 0, because a >= b
 
-    result.normalize();
     return result;
   }
 
@@ -336,11 +341,68 @@ struct MPInt_Value {
       }
     }
 
-    result.normalize();
     return result;
   }
 
-  static MPInt_Value div_abs(const MPInt_Value &a, const MPInt_Value &b) {}
+  static MPInt_Value div_abs(const MPInt_Value &a, const MPInt_Value &b) {
+    if (b.is_zero()) {
+      throw std::domain_error("MPInt_Value::div_abs: division by zero");
+    }
+
+    // a/b && a < b => a/b = 0
+    if (cmp_abs(a, b) < 0) {
+      return MPInt_Value::from_integral(0);
+    }
+
+    // a, but reversed
+    MPInt_Value a_rev = a;
+    // O(n) but only twice - here and at the end
+    std::reverse(a_rev.digits_.begin(), a_rev.digits_.end());
+
+    MPInt_Value quotient;
+    quotient.digits_.resize(a.digits_.size(), 0);
+
+    MPInt_Value remainder;
+    remainder.digits_.clear();
+
+    // for all stored digits in a_reversed
+    for (std::size_t i = 0; i < a_rev.digits_.size(); ++i) {
+      remainder.digits_.push_back(a_rev.digits_[i]);
+
+      quotient.digits_[i] = find_quotient_digit(remainder, b);
+      remainder =
+          sub_abs(remainder,
+                  mul_abs(b, MPInt_Value::from_integral(quotient.digits_[i])));
+    }
+
+    std::reverse(a_rev.digits_.begin(), a_rev.digits_.end());
+    quotient.normalize();
+    return quotient;
+  }
+
+  // == helper for division ==
+
+  // find the largest single-byte multiplier which satisfies:
+  // b * multiplier <= remainder
+  static std::uint8_t find_quotient_digit(const MPInt_Value &remainder,
+                                          const MPInt_Value &b) {
+    std::uint8_t multiplier = 0;
+    std::uint8_t low = 0, high = 0xFF;
+
+    while (low <= high) {
+      std::uint8_t mid = static_cast<std::uint8_t>((low + high) / 2);
+      MPInt_Value trial = mul_abs(b, MPInt_Value::from_integral(mid));
+
+      if (cmp_abs(trial, remainder) <= 0) {
+        multiplier = mid;
+        low = mid + 1;
+      } else {
+        high = mid - 1;
+      }
+    }
+
+    return multiplier;
+  }
 
   // ==== Compare operations ====
 
