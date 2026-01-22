@@ -1,6 +1,5 @@
 #pragma once
 
-#include <algorithm>
 #include <concepts>
 #include <cstddef>
 #include <cstdint>
@@ -23,7 +22,7 @@ using digits_type = std::vector<std::uint8_t>;
 
 // bytes_ is effectivelly an array of unsigned bytes,
 // the LSB is at bytes_[0]
-struct MPInt_Struct {
+struct MPInt_Value {
   digits_type digits_;
   bool is_positive_;
 };
@@ -37,20 +36,20 @@ class MPInt;
 // attribute of error: value
 class Overflow_Error : public std::runtime_error {
 protected:
-  MPInt_Struct value_;
+  MPInt_Value value_;
 
 public:
-  explicit Overflow_Error(MPInt_Struct &&v)
-      : std::runtime_error("MPInt overflow"), value_(std::move(v)) {}
+  explicit Overflow_Error(MPInt_Value &&value)
+      : std::runtime_error("MPInt overflow"), value_(std::move(value)) {}
 
-  explicit Overflow_Error(const MPInt_Struct &v)
-      : std::runtime_error("MPInt overflow"), value_(v) {}
+  explicit Overflow_Error(const MPInt_Value &value)
+      : std::runtime_error("MPInt overflow"), value_(value) {}
 
-  explicit Overflow_Error(MPInt_Struct &&v, std::string &&msg)
-      : std::runtime_error(std::move(msg)), value_(std::move(v)) {}
+  explicit Overflow_Error(MPInt_Value &&value, std::string &&msg)
+      : std::runtime_error(std::move(msg)), value_(std::move(value)) {}
 
-  explicit Overflow_Error(const MPInt_Struct &v, std::string &&msg)
-      : std::runtime_error(std::move(msg)), value_(v) {}
+  explicit Overflow_Error(const MPInt_Value &value, std::string &&msg)
+      : std::runtime_error(std::move(msg)), value_(value) {}
 
   inline MPInt<Unlimited> unlimited_value() const;
 };
@@ -64,83 +63,34 @@ class MPInt {
 
 private:
   // internal storage of number
-  MPInt_Struct value_;
+  MPInt_Value value_;
 
 public:
+  ~MPInt() = default;
   // let the default value be 0 if none is assigned on creation
   MPInt() : MPInt(0) {}
-  virtual ~MPInt() = default;
 
   // based on given initial number, initialize the MPInt number.
-  template <std::integral T> MPInt(T value) {
-    if constexpr (PRECISION == Unlimited) {
-      value_.digits_.reserve(4096);
-    } else {
-      value_.digits_.reserve(PRECISION);
-    }
+  template <std::integral T> MPInt(T number) {} // TODO:
 
-    // determine sign of given number
-    value_.is_positive_ = true;
-    if (value < 0) {
-      value_.is_positive_ = false;
-    }
+  // based on given string (must be a valid numeric string with optional leading
+  // sign, no whitespaces, no trailing spaces), initialize the MPInt number
+  MPInt(const std::string &number_s) {} // TODO:
 
-    // copy number (without sign) to bytes_
-    auto tmp = make_from_integral(value);
-    set_digits(std::move(tmp));
-  }
+  // wrap the value with class with all the functionality
+  MPInt(const MPInt_Value &value) { value_ = value; }
 
-  MPInt(const std::string &value) {
-    if (value.empty()) {
-      throw std::invalid_argument("Cannot construct MPInt from empty string");
-    }
-
-    // determine sign
-    value_.is_positive_ = true;
-    std::size_t start = 0;
-    if (value[0] == '-') {
-      value_.is_positive_ = false;
-      start = 1;
-    } else if (value[0] == '+') {
-      start = 1;
-    }
-
-    digits_type tmp{0}; // start with 0
-
-    // for all chars inside string
-    for (std::size_t i = start; i < value.size(); ++i) {
-      if (value[i] < '0' || value[i] > '9') {
-        throw std::invalid_argument("Invalid character in MPInt string");
-      }
-      int digit = value[i] - '0';
-
-      // multiply current tmp by 10 and add digit
-      int carry = digit;
-      for (std::size_t j = 0; j < tmp.size(); ++j) {
-        int val = tmp[j] * 10 + carry;
-        tmp[j] = val & 0xFF; // low 8 bits
-        carry = val >> 8;    // carry to next byte
-      }
-      while (carry > 0) {
-        tmp.push_back(carry & 0xFF);
-        carry >>= 8;
-      }
-    }
-
-    set_digits(std::move(tmp));
-  }
-
-  MPInt(const MPInt_Struct &inner) { value_ = inner; }
-
-  // move, copy
+  // copy semantics
   MPInt(const MPInt &) = default;
+  // move semantics
   MPInt(MPInt &&) noexcept = default;
 
 private:
   // Make vector of uint8_t from any integral value. Discards sign. Returns
   // normalized number.
-  template <std::integral T> static MPInt_Struct make_from_integral(T value) {
-    MPInt_Struct res;
+  // TODO: decompose, maybe change based on MPInt_Value
+  template <std::integral T> static MPInt_Value make_from_integral(T number) {
+    MPInt_Value value;
 
     // The same type as T, but unsigned.
     using Unsigned_T = std::make_unsigned_t<T>;
@@ -148,61 +98,61 @@ private:
     Unsigned_T u;
 
     // get rid of sign, set u as unsigned value
-    res.is_positive_ = true;
+    value.is_positive_ = true;
     if constexpr (std::is_signed_v<T>) {
-      if (value < 0) {
-        res.is_positive_ = false;
+      if (number < 0) {
+        value.is_positive_ = false;
 
         // abs(INT_MIN) = abs(INT_MAX) + 1
         // [see](https://www.geeksforgeeks.org/cpp/int_max-int_min-cc-applications/)
-        u = static_cast<Unsigned_T>(-(value + 1));
+        u = static_cast<Unsigned_T>(-(number + 1));
         ++u;
       } else {
-        u = static_cast<Unsigned_T>(value);
+        u = static_cast<Unsigned_T>(number);
       }
 
     } else { // unsigned value is already done
-      u = value;
+      u = number;
     }
 
     if (u == 0) {
-      res.digits_.push_back(0);
+      value.digits_.push_back(0);
     }
 
     // copy all bytes from u to tmp
     while (u > 0) {
       // only look at the last 8 bits
-      res.digits_.push_back(static_cast<uint8_t>(u & 0xFF));
+      value.digits_.push_back(static_cast<uint8_t>(u & 0xFF));
       u >>= 8;
     }
 
-    normalize(res);
-    return res;
+    normalize(value);
+    return value;
   }
 
   // remove all trailing zeros from number, eg. 05 => 5; 00 => 0
-  static void normalize(MPInt_Struct &inner) {
-    while (inner.digits_.size() > 1 && inner.digits_.back() == 0) {
-      inner.digits_.pop_back();
+  static void normalize(MPInt_Value &value) {
+    while (value.digits_.size() > 1 && value.digits_.back() == 0) {
+      value.digits_.pop_back();
     }
   }
 
   // if number is overflown throw error
-  static void check_overflow(const MPInt_Struct &inner) {
+  static void check_overflow(const MPInt_Value &value) {
     if constexpr (PRECISION == Unlimited) {
       return;
     }
-    if (inner.digits_.size() > PRECISION) {
-      throw Overflow_Error(inner, "overflow error: unknown sign");
+    if (value.digits_.size() > PRECISION) {
+      throw Overflow_Error(value, "overflow error: unknown sign");
     }
   }
 
   // given vector of bytes, normalize them, check overflow and move them to
   // bytes_
-  void set_digits(MPInt_Struct &&inner) {
-    normalize(inner);
-    check_overflow(inner);
-    value_ = std::move(inner);
+  void set_digits(MPInt_Value &&value) {
+    normalize(value);
+    check_overflow(value);
+    value_ = std::move(value);
   }
 };
 
