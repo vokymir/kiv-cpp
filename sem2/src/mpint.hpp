@@ -192,9 +192,23 @@ struct MPInt_Value {
     return result;
   }
 
-  static MPInt_Value mul(const MPInt_Value &a, const MPInt_Value &b) {}
+  // multiply two signed values
+  static MPInt_Value mul(const MPInt_Value &a, const MPInt_Value &b) {
+    MPInt_Value result = mul_abs(a, b);
+    // ++ = +, -- = + | +- = -, -+ = -
+    result.is_positive_ = (a.is_positive_ == b.is_positive_);
 
-  static MPInt_Value div(const MPInt_Value &a, const MPInt_Value &b) {}
+    return result;
+  }
+
+  // divide a by b (signed operation)
+  static MPInt_Value div(const MPInt_Value &a, const MPInt_Value &b) {
+    MPInt_Value result = div_abs(a, b);
+    // same logic as in mul
+    result.is_positive_ = (a.is_positive_ == b.is_positive_);
+
+    return result;
+  }
 
   // TODO: factorial - only need one value
   static MPInt_Value fct(const MPInt_Value &a, const MPInt_Value &b) {}
