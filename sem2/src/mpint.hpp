@@ -15,6 +15,8 @@ namespace MPInt {
 // static size used for denoting that MPInt number uses *unlimited precision*
 static constexpr std::size_t Unlimited = 0;
 
+namespace _detail {
+
 // ensuring MPInt number has valid precision parameter -> integer >= 4 or
 // specific constant for unlimited precision
 template <std::size_t PRECISION>
@@ -435,11 +437,14 @@ struct MPInt_Value {
   bool is_zero() const { return digits_.size() == 1 && digits_[0] == 0; }
 };
 
-// forward declare - because the Overflow_Error class needs to know about
-// MPInt
+} // namespace _detail
+
 template <std::size_t PRECISION>
-  requires Valid_MPInt_Precision<PRECISION>
+  requires _detail::Valid_MPInt_Precision<PRECISION>
 class MPInt;
+
+// MPInt was here only forward declared - because the Overflow_Error class needs
+// to know about MPInt
 
 // specific error for overflowed number. stores the value which caused
 // overflow. the stored value is in unlimited precision, so no overflow would
@@ -448,23 +453,23 @@ class Overflow_Error : public std::runtime_error {
   static constexpr std::string default_message = "MPInt overflow";
 
 protected:
-  MPInt_Value value_;
+  _detail::MPInt_Value value_;
 
 public:
   // move constructor
-  explicit Overflow_Error(MPInt_Value &&value)
+  explicit Overflow_Error(_detail::MPInt_Value &&value)
       : std::runtime_error(default_message), value_(std::move(value)) {}
 
   // copy constructor
-  explicit Overflow_Error(const MPInt_Value &value)
+  explicit Overflow_Error(const _detail::MPInt_Value &value)
       : std::runtime_error(default_message), value_(value) {}
 
   // move constructor with custom message
-  explicit Overflow_Error(MPInt_Value &&value, std::string &&msg)
+  explicit Overflow_Error(_detail::MPInt_Value &&value, std::string &&msg)
       : std::runtime_error(std::move(msg)), value_(std::move(value)) {}
 
   // copy constructor with custom message
-  explicit Overflow_Error(const MPInt_Value &value, std::string &&msg)
+  explicit Overflow_Error(const _detail::MPInt_Value &value, std::string &&msg)
       : std::runtime_error(std::move(msg)), value_(value) {}
 
   // get value which caused overflow in unlimited precision
@@ -476,16 +481,16 @@ public:
 // parameter PRECISION (in bytes). use any integer >= 4 or MPInt::Unlimited
 // for unlimited precision
 template <std::size_t PRECISION>
-  requires Valid_MPInt_Precision<PRECISION>
+  requires _detail::Valid_MPInt_Precision<PRECISION>
 class MPInt {
   // debug output for MPInt precision parameter
-  static_assert(Valid_MPInt_Precision<PRECISION>,
+  static_assert(_detail::Valid_MPInt_Precision<PRECISION>,
                 "MPInt precision must be >= 4 bytes or MPInt::Unlimited");
 
   // ===== Variables =====
 private:
   // internal storage of number
-  MPInt_Value value_;
+  _detail::MPInt_Value value_;
 
   // ===== Constuctors =====
 public:
@@ -497,7 +502,7 @@ public:
 
   // based on given initial number, initialize the MPInt number.
   template <std::integral T> explicit MPInt(T number) {
-    auto val = MPInt_Value::from_integral(number);
+    auto val = _detail::MPInt_Value::from_integral(number);
     check_overflow(val);
     value_ = std::move(val);
   }
@@ -506,14 +511,14 @@ public:
   // leading sign, no whitespaces, no trailing spaces), initialize the MPInt
   // number
   explicit MPInt(const std::string &number_s) {
-    auto val = MPInt_Value::from_string(number_s);
+    auto val = _detail::MPInt_Value::from_string(number_s);
     check_overflow(val);
     value_ = std::move(val);
   }
 
   // wrap the plain value with capable class
-  MPInt(const MPInt_Value &value) { value_ = value; }
-  MPInt(MPInt_Value &&value) { value_ = std::move(value); }
+  MPInt(const _detail::MPInt_Value &value) { value_ = value; }
+  MPInt(_detail::MPInt_Value &&value) { value_ = std::move(value); }
 
   // copy/move semantics
   MPInt(const MPInt &) = default;
@@ -522,7 +527,7 @@ public:
   // ===== Private methods =====
 private:
   // if value is overflown throw error
-  static void check_overflow(const MPInt_Value &value) {
+  static void check_overflow(const _detail::MPInt_Value &value) {
     if constexpr (PRECISION == Unlimited) {
       return;
     }
@@ -538,7 +543,7 @@ public:
   // overflow
   template <std::size_t OTHER_PRECISION>
   MPInt<PRECISION> &operator+=(const MPInt<OTHER_PRECISION> &rhs) {
-    value_ = MPInt_Value::add(value_, rhs.value_);
+    value_ = _detail::MPInt_Value::add(value_, rhs.value_);
     check_overflow(value_);
     return *this;
   }
@@ -547,7 +552,7 @@ public:
   // on overflow
   template <std::size_t OTHER_PRECISION>
   MPInt<PRECISION> &operator-=(const MPInt<OTHER_PRECISION> &rhs) {
-    value_ = MPInt_Value::sub(value_, rhs.value_);
+    value_ = _detail::MPInt_Value::sub(value_, rhs.value_);
     check_overflow(value_);
     return *this;
   }
@@ -556,7 +561,7 @@ public:
   // throw on overflow
   template <std::size_t OTHER_PRECISION>
   MPInt<PRECISION> &operator*=(const MPInt<OTHER_PRECISION> &rhs) {
-    value_ = MPInt_Value::mul(value_, rhs.value_);
+    value_ = _detail::MPInt_Value::mul(value_, rhs.value_);
     check_overflow(value_);
     return *this;
   }
@@ -565,7 +570,7 @@ public:
   // overflow
   template <std::size_t OTHER_PRECISION>
   MPInt<PRECISION> &operator/=(const MPInt<OTHER_PRECISION> &rhs) {
-    value_ = MPInt_Value::div(value_, rhs.value_);
+    value_ = _detail::MPInt_Value::div(value_, rhs.value_);
     check_overflow(value_);
     return *this;
   }
@@ -613,7 +618,7 @@ public:
 
   // factorial: keep precision
   void factorial() {
-    value_ = MPInt_Value::fct(value_);
+    value_ = _detail::MPInt_Value::fct(value_);
     check_overflow(value_);
   }
 };
