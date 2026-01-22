@@ -153,11 +153,18 @@ struct MPInt_Value {
   static MPInt_Value add(const MPInt_Value &a, const MPInt_Value &b) {
     MPInt_Value result;
 
-    if (a.is_positive_ == b.is_positive_) {
-      result = add_abs(a, b);
+    if (a.is_positive_ == b.is_positive_) { // same sign
+      result = add_abs(a, b);               // simply add digits & keep sign
       result.is_positive_ = a.is_positive_;
 
-    } else {
+    } else { // different sign
+             // subtract from bigger & keep biggers sign
+      int cmp = cmp_abs(a, b);
+      const auto &bigger_abs = (cmp >= 0) ? a : b;
+      const auto &smaller_abs = (cmp >= 0) ? b : a;
+
+      result = sub_abs(bigger_abs, smaller_abs);
+      result.is_positive_ = bigger_abs.is_positive_;
     }
 
     return result;
