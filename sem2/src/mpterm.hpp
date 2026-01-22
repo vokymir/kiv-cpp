@@ -68,6 +68,9 @@ constexpr char to_char(Operator op) {
   case Operator::Invalid:
     return '?';
   }
+
+  // also invalid operator, but in other way
+  return '#';
 }
 
 // get operator from char
@@ -194,7 +197,7 @@ private:
   }
 
   // get stringview on everything before the operand position
-  std::string_view get_first_operand(std::string_view &input,
+  std::string_view get_first_operand(std::string_view input,
                                      std::size_t op_pos) {
     return (op_pos < input.size()) ? input.substr(0, op_pos)
                                    : std::string_view{};
