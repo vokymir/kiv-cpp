@@ -7,6 +7,7 @@
 #include <cstdlib>
 #include <stdexcept>
 #include <string>
+#include <type_traits>
 #include <vector>
 
 namespace MPInt {
@@ -33,8 +34,35 @@ struct MPInt_Value {
     }
   }
 
-  template <std::integral T>
-  static MPInt_Value from_integral(T number); // TODO:
+  template <std::integral T> static MPInt_Value from_integral(T number) {
+    MPInt_Value value;
+
+    using Unsigned_T = std::make_unsigned_t<T>;
+    Unsigned_T u{0};
+
+    // get sign & absolute value
+    if constexpr (std::is_signed_v<T>) {
+      if (number < 0) {
+        value.is_positive_ = false;
+
+        // handle INT_MIN (in absolute is one bigger than INT_MAX)
+        u = static_cast<Unsigned_T>(-(number + 1));
+        ++u;
+      } else {
+        u = static_cast<Unsigned_T>(number);
+      }
+    } else {
+      u = number;
+    }
+
+    // copy digits
+    while (u > 0) {
+      value.digits_.push_back(static_cast<std::uint8_t>(u & 0xFF));
+    }
+
+    value.normalize();
+    return value;
+  }
 
   static MPInt_Value from_string(const std::string &s); // TODO:
 };
