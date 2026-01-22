@@ -21,19 +21,28 @@ concept Valid_MPInt_Precision = (PRECISION >= 4) || PRECISION == Unlimited;
 
 using digits_type = std::vector<std::uint8_t>;
 
-// bytes_ is effectivelly an array of unsigned bytes,
-// the LSB is at bytes_[0]
+// default value = +0
 struct MPInt_Value {
-  // default value = +0
-  digits_type digits_{1, 0};
+  // digits_ is effectivelly an array of unsigned bytes,
+  // the LSB is at bytes_[0]
+  digits_type digits_{0};
   bool is_positive_{true};
 
+  // make the digits_ vector as small as possible, ensure normal form of value
   void normalize() noexcept {
+    // don't allow trailing zeros: 07 > 7, -01 > -1, 00 > 0
     while (digits_.size() > 1 && digits_.back() == 0) {
       digits_.pop_back();
     }
+
+    // only allow one zero, the positive one: -0 > +0
+    if (digits_.size() == 1 && digits_.front() == 0) {
+      is_positive_ = true;
+    }
   }
 
+  // make mpint_value from any integral type (int, long, ...)
+  // returns normalized value
   template <std::integral T> static MPInt_Value from_integral(T number) {
     MPInt_Value value;
 
@@ -42,28 +51,36 @@ struct MPInt_Value {
 
     // get sign & absolute value
     if constexpr (std::is_signed_v<T>) {
-      if (number < 0) {
+      if (number < 0) { // negative number
         value.is_positive_ = false;
 
         // handle INT_MIN (in absolute is one bigger than INT_MAX)
         u = static_cast<Unsigned_T>(-(number + 1));
         ++u;
-      } else {
+
+      } else { // positive number
         u = static_cast<Unsigned_T>(number);
       }
-    } else {
+    } else { // unsigned number
       u = number;
     }
 
-    // copy digits
-    while (u > 0) {
+    // default value is 0, must be definitely cleared before copying digits
+    value.digits_.clear();
+
+    // copy digits - do/while because we want to copy 0, which escapes condition
+    // on first check
+    do {
       value.digits_.push_back(static_cast<std::uint8_t>(u & 0xFF));
-    }
+      u >>= 8;
+    } while (u > 0);
 
     value.normalize();
     return value;
   }
 
+  // make mpint_value from numeric string - may start with sign +/-, all other
+  // characters must be numeric
   // assumptions: the numeric literals 0-9 are stored in ascending order list in
   // character representation
   // string is in decadic form
@@ -87,7 +104,7 @@ struct MPInt_Value {
       throw std::invalid_argument("MPInt_Value: invalid numeric string");
     }
 
-    for (; pos < s.size(); ++pos) {
+    for (; pos < s.size(); ++pos) { // for each char in str
       char c = s[pos];
 
       if (c < '0' || c > '9') {
@@ -101,10 +118,14 @@ struct MPInt_Value {
       for (std::size_t i = 0; i < value.digits_.size(); ++i) {
         std::uint16_t tmp =
             static_cast<std::uint16_t>(value.digits_[i]) * 10 + carry;
+
+        // only use the lesser 8 bits
         value.digits_[i] = static_cast<std::uint8_t>(tmp & 0xFF);
+        // if anything left in tmp, store that in carry
         carry = tmp >> 8;
       }
 
+      // store everything left in carry
       while (carry > 0) {
         value.digits_.push_back(static_cast<std::uint8_t>(carry & 0xFF));
         carry >>= 8;
