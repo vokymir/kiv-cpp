@@ -18,6 +18,9 @@ file(GLOB_RECURSE SOURCES
 # main executable
 add_executable(${PROJECT_NAME} ${SOURCES})
 
+# add library for nicer terminal
+target_link_libraries(${PROJECT_NAME} PRIVATE readline) # cmd-like arrow up/down usage
+
 # set binaries dir for output
 set_target_properties(${PROJECT_NAME} PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin
