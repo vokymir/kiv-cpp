@@ -150,6 +150,8 @@ struct MPInt_Value {
 
   // === SIGNED ===
 
+  // add two MPInt_Values - signed operation.
+  // return new MPInt_Value
   static MPInt_Value add(const MPInt_Value &a, const MPInt_Value &b) {
     MPInt_Value result;
 
@@ -170,7 +172,25 @@ struct MPInt_Value {
     return result;
   }
 
-  static MPInt_Value sub(const MPInt_Value &a, const MPInt_Value &b) {}
+  // subtract b from a (signed operation)
+  // return new MPInt_Value
+  static MPInt_Value sub(const MPInt_Value &a, const MPInt_Value &b) {
+    MPInt_Value result;
+    int cmp = cmp_abs(a, b);
+
+    if (a.is_positive_ == b.is_positive_) { // same sign
+      result = sub_abs(a, b);
+      // if b > a: invert sign of a, else keep sign of a
+      result.is_positive_ = (cmp < 0) ? !a.is_positive_ : a.is_positive_;
+
+    } else { // different sign
+      result = add_abs(a, b);
+      // keep sign of a
+      result.is_positive_ = a.is_positive_;
+    }
+
+    return result;
+  }
 
   static MPInt_Value mul(const MPInt_Value &a, const MPInt_Value &b) {}
 
