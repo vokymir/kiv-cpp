@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
+#include <ostream>
 #include <stdexcept>
 #include <string>
 #include <type_traits>
@@ -444,6 +445,55 @@ struct MPInt_Value {
 
   // check if MPInt_Value is zero
   bool is_zero() const { return digits_.size() == 1 && digits_[0] == 0; }
+
+  // ===== when needed to stringify =====
+
+  // divide the value by small divisor (8bits), faster/cheaper but only useful
+  // with small numbers - which is when converting to different bases (base10,
+  // base16,...)
+  //
+  // divide val IN_PLACE! and return remainder
+  static std::uint8_t div_small(MPInt_Value &val, std::uint8_t div) {
+    std::uint16_t carry = 0;
+    auto &d = val.digits_;
+
+    // must go from MSD (right-most byte)
+    for (auto it = d.rbegin(); it != d.rend(); ++it) {
+      std::uint16_t curr = (carry << 8) | *it;
+      *it = static_cast<std::uint8_t>(curr / div);
+      carry = curr % div;
+    }
+
+    val.normalize();
+    return static_cast<std::uint8_t>(carry);
+  }
+
+  // convert number to string of any base from 2 to 255
+  std::string to_string(std::uint8_t base = 10) const {
+    if (digits_.size() == 1 && digits_[0] == 0) {
+      return "0";
+    }
+
+    if (base < 2 || base > 255) {
+      throw std::domain_error("Not supported base for number conversion.");
+    }
+
+    MPInt_Value tmp{*this}; // copy this for in-place division
+    std::string out; // initially stored in reversed order, fixed at the end
+
+    // divide by base and store remainder
+    while (!(tmp.digits_.size() == 1 && tmp.digits_[0] == 0)) {
+      auto rem = div_small(tmp, base);
+      out.push_back(static_cast<char>('0' + rem));
+    }
+
+    if (!is_positive_) {
+      out.push_back('-');
+    }
+
+    std::reverse(out.begin(), out.end());
+    return out;
+  }
 };
 
 } // namespace _detail
@@ -637,7 +687,16 @@ public:
     check_overflow(value);
     value_ = std::move(value);
   }
+
+  // convert to decadic string representation
+  std::string to_string() const { return value_.to_string(); }
 };
+
+// convert number to base10 numeric string
+template <std::size_t P>
+std::ostream &operator<<(std::ostream &os, const MPInt<P> &number) {
+  return os << number.to_string();
+}
 
 // was declared in Overflow_Error, but due to it unknowing the templated class
 // MPInt, it must be defined after the MPInt class definition
