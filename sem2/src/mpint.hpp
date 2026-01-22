@@ -234,7 +234,39 @@ struct MPInt_Value {
 
   // === UNSIGNED ===
 
-  static MPInt_Value add_abs(const MPInt_Value &a, const MPInt_Value &b) {}
+  // add absolute values of two numbers, ignores sign completely
+  // return normalized MPInt_Value
+  static MPInt_Value add_abs(const MPInt_Value &a, const MPInt_Value &b) {
+    MPInt_Value result;
+
+    const std::size_t max_size = std::max(a.digits_.size(), b.digits_.size());
+    result.digits_.resize(max_size, 0);
+
+    std::uint16_t carry = 0;
+
+    // from LSB add a+b+carry
+    for (std::size_t i = 0; i < max_size; ++i) {
+      std::uint16_t sum = carry;
+      if (i < a.digits_.size()) {
+        sum += a.digits_[i];
+      }
+      if (i < b.digits_.size()) {
+        sum += b.digits_[i];
+      }
+
+      // only use lower 8 bits, upper 8 is stored in carry
+      result.digits_[i] = static_cast<std::uint8_t>(sum & 0xFF);
+      carry = sum >> 8;
+    }
+
+    // overflow from max_size (don't have to be a problem due to normalization)
+    if (carry != 0) {
+      result.digits_.push_back(static_cast<std::uint8_t>(carry));
+    }
+
+    result.normalize();
+    return result;
+  }
 
   static MPInt_Value sub_abs(const MPInt_Value &a, const MPInt_Value &b) {}
 
