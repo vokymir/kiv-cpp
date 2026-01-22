@@ -26,10 +26,15 @@ using digits_type = std::vector<std::uint8_t>;
 // Stores the MPInt_Value, can only create and normalize - all fancy operations
 // are implemented on MPInt default value = +0
 struct MPInt_Value {
+  // ===== Variables =====
+
   // digits_ is effectivelly an array of unsigned bytes,
   // the LSB is at bytes_[0]
   digits_type digits_{0};
+
   bool is_positive_{true};
+
+  // ===== Public methods =====
 
   // make the digits_ vector as small as possible, ensure normal form of value
   void normalize() noexcept {
@@ -43,6 +48,8 @@ struct MPInt_Value {
       is_positive_ = true;
     }
   }
+
+  // ===== Static constructors =====
 
   // make mpint_value from any integral type (int, long, ...)
   // returns normalized value
@@ -138,16 +145,79 @@ struct MPInt_Value {
     value.normalize();
     return value;
   }
+
+  // ===== Static mathematical operations =====
+
+  // === SIGNED ===
+
+  static MPInt_Value add(const MPInt_Value &a, const MPInt_Value &b) {
+    MPInt_Value result;
+
+    if (a.is_positive_ == b.is_positive_) {
+      result = add_abs(a, b);
+      result.is_positive_ = a.is_positive_;
+
+    } else {
+    }
+
+    return result;
+  }
+
+  static MPInt_Value sub(const MPInt_Value &a, const MPInt_Value &b) {}
+
+  static MPInt_Value mul(const MPInt_Value &a, const MPInt_Value &b) {}
+
+  static MPInt_Value div(const MPInt_Value &a, const MPInt_Value &b) {}
+
+  // TODO: factorial - only need one value
+  static MPInt_Value fct(const MPInt_Value &a, const MPInt_Value &b) {}
+
+  // === UNSIGNED ===
+
+  static MPInt_Value add_abs(const MPInt_Value &a, const MPInt_Value &b) {}
+
+  static MPInt_Value sub_abs(const MPInt_Value &a, const MPInt_Value &b) {}
+
+  static MPInt_Value mul_abs(const MPInt_Value &a, const MPInt_Value &b) {}
+
+  static MPInt_Value div_abs(const MPInt_Value &a, const MPInt_Value &b) {}
+
+  static MPInt_Value fct_abs(const MPInt_Value &a, const MPInt_Value &b) {}
+
+  // ==== Compare operations ====
+
+  // compare the absolute values.
+  // return 1 if a > b, -1 if a < b, 0 if a = b
+  static int cmp_abs(const MPInt_Value &a, const MPInt_Value &b) {
+    // one have more digits
+    if (a.digits_.size() != b.digits_.size()) {
+      return (a.digits_.size() > b.digits_.size()) ? 1 : -1;
+    }
+
+    // from the MSD (most right) traverse all digits
+    for (size_t i = a.digits_.size() - 1; i >= 0; --i) {
+      if (a.digits_[i] == b.digits_[i]) { // same digit
+        continue;
+      }
+
+      // different digit
+      return (a.digits_[i] > b.digits_[i]) ? 1 : -1;
+    }
+
+    // all digits are the same
+    return 0;
+  }
 };
 
-// forward declare - because the Overflow_Error class needs to know about MPInt
+// forward declare - because the Overflow_Error class needs to know about
+// MPInt
 template <std::size_t PRECISION>
   requires Valid_MPInt_Precision<PRECISION>
 class MPInt;
 
-// specific error for overflowed number. stores the value which caused overflow.
-// the stored value is in unlimited precision, so no overflow would be caused
-// from it
+// specific error for overflowed number. stores the value which caused
+// overflow. the stored value is in unlimited precision, so no overflow would
+// be caused from it
 class Overflow_Error : public std::runtime_error {
   static constexpr std::string default_message = "MPInt overflow";
 
@@ -177,8 +247,8 @@ public:
 };
 
 // represents any integer number in precision not defined by machine, but by
-// parameter PRECISION (in bytes). use any integer >= 4 or MPInt::Unlimited for
-// unlimited precision
+// parameter PRECISION (in bytes). use any integer >= 4 or MPInt::Unlimited
+// for unlimited precision
 template <std::size_t PRECISION>
   requires Valid_MPInt_Precision<PRECISION>
 class MPInt {
@@ -186,10 +256,12 @@ class MPInt {
   static_assert(Valid_MPInt_Precision<PRECISION>,
                 "MPInt precision must be >= 4 bytes or MPInt::Unlimited");
 
+  // ===== Variables =====
 private:
   // internal storage of number
   MPInt_Value value_;
 
+  // ===== Constuctors =====
 public:
   ~MPInt() = default;
 
@@ -204,8 +276,9 @@ public:
     value_ = std::move(val);
   }
 
-  // based on given string (must be a valid numeric string with optional leading
-  // sign, no whitespaces, no trailing spaces), initialize the MPInt number
+  // based on given string (must be a valid numeric string with optional
+  // leading sign, no whitespaces, no trailing spaces), initialize the MPInt
+  // number
   explicit MPInt(const std::string &number_s) {
     auto val = MPInt_Value::from_string(number_s);
     check_overflow(val);
@@ -220,6 +293,7 @@ public:
   MPInt(const MPInt &) = default;
   MPInt(MPInt &&) noexcept = default;
 
+  // ===== Private methods =====
 private:
   // if value is overflown throw error
   static void check_overflow(const MPInt_Value &value) {
@@ -231,6 +305,9 @@ private:
       throw Overflow_Error(value);
     }
   }
+
+  // ===== Operator overloads =====
+public:
 };
 
 // was declared in Overflow_Error, but due to it unknowing the templated class
