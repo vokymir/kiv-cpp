@@ -4,7 +4,11 @@
 #include <algorithm>
 #include <cstddef>
 #include <deque>
+#include <iostream>
+#include <readline/history.h>
+#include <readline/readline.h>
 #include <stdexcept>
+#include <string>
 
 namespace MPTerm {
 
@@ -46,6 +50,32 @@ template <std::size_t P>
 class MPTerm {
 private:
   _detail::Bank<P, 5> bank_;
+
+public:
+  // run the MP Terminal
+  void run() {
+    std::cout << "Welcome to Multiple Precision Terminal. Current precision is "
+              << ((P == 0) ? "infinite" : std::to_string(P)) << " bytes."
+              << std::endl;
+
+    bool exit = false;
+    while (!exit) {
+      char *input = readline("> ");
+
+      if (!input) {
+        break;
+      }
+
+      if (*input) {
+        add_history(input);
+      }
+
+      free(input);
+    }
+
+    std::cout << "Thank you for using the Multiple Precision Terminal."
+              << std::endl;
+  }
 };
 
 } // namespace MPTerm
