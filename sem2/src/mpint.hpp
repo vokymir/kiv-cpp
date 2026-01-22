@@ -307,7 +307,38 @@ struct MPInt_Value {
     return result;
   }
 
-  static MPInt_Value mul_abs(const MPInt_Value &a, const MPInt_Value &b) {}
+  static MPInt_Value mul_abs(const MPInt_Value &a, const MPInt_Value &b) {
+    MPInt_Value result;
+    result.digits_.resize(a.digits_.size() + b.digits_.size(), 0);
+
+    for (std::size_t i = 0; i < a.digits_.size(); ++i) {
+      std::uint16_t carry = 0;
+
+      for (std::size_t j = 0; j < b.digits_.size(); ++j) {
+        std::uint16_t sum =
+            static_cast<std::uint16_t>(result.digits_[i + j]) +
+            static_cast<std::uint16_t>(a.digits_[i]) * b.digits_[j] + carry;
+
+        result.digits_[i + j] = static_cast<std::uint8_t>(sum & 0xFF);
+        carry = sum >> 8;
+      }
+
+      // remaining carry - might be loong
+      std::size_t k = i + b.digits_.size();
+      while (carry > 0) {
+        std::uint16_t sum =
+            static_cast<std::uint16_t>(result.digits_[k]) + carry;
+
+        result.digits_[k] = static_cast<std::uint8_t>(sum & 0xFF);
+
+        carry = sum >> 8;
+        ++k;
+      }
+    }
+
+    result.normalize();
+    return result;
+  }
 
   static MPInt_Value div_abs(const MPInt_Value &a, const MPInt_Value &b) {}
 
