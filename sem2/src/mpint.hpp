@@ -268,7 +268,44 @@ struct MPInt_Value {
     return result;
   }
 
-  static MPInt_Value sub_abs(const MPInt_Value &a, const MPInt_Value &b) {}
+  // subtract the absolute value of b from abs(a). if a < b throw.
+  // return normalized MPInt_Value result
+  static MPInt_Value sub_abs(const MPInt_Value &a, const MPInt_Value &b) {
+    if (MPInt_Value::cmp_abs(a, b) < 0) {
+      throw std::domain_error("MPInt_Value::sub_abs(a,b): absolute subtraction "
+                              "for a-b require a>b");
+    }
+
+    MPInt_Value result;
+    result.digits_.resize(a.digits_.size(), 0); // a >= b
+
+    std::int16_t borrow = 0;
+
+    // from LSB to far right
+    for (std::size_t i = 0; i < a.digits_.size(); ++i) {
+      // subtract: a - b - borrow
+      std::int16_t diff = static_cast<std::int16_t>(a.digits_[i]) - borrow;
+      if (i < b.digits_.size()) {
+        diff -= b.digits_[i];
+      }
+
+      // wrap-around in base256 (byte, 2^8)
+      if (diff < 0) {
+        diff += 256;
+        borrow = 1;
+      } else {
+        borrow = 0;
+      }
+
+      // now it's safe to cast diff
+      result.digits_[i] = static_cast<std::uint8_t>(diff);
+    }
+
+    // borrow will be 0, because a >= b
+
+    result.normalize();
+    return result;
+  }
 
   static MPInt_Value mul_abs(const MPInt_Value &a, const MPInt_Value &b) {}
 
