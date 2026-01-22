@@ -78,12 +78,15 @@ struct MPInt_Value {
     // default value is 0, must be definitely cleared before copying digits
     value.digits_.clear();
 
+    // avoiding undefined behaviour on std::uint8_t >> 8
+    std::uintmax_t uu = u;
+
     // copy digits - do/while because we want to copy 0, which escapes condition
     // on first check
     do {
-      value.digits_.push_back(static_cast<std::uint8_t>(u & 0xFF));
-      u >>= 8;
-    } while (u > 0);
+      value.digits_.push_back(static_cast<std::uint8_t>(uu & 0xFF));
+      uu >>= 8;
+    } while (uu > 0);
 
     value.normalize();
     return value;
