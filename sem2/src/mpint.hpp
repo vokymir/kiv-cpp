@@ -15,13 +15,16 @@ namespace MPInt {
 // static size used for denoting that MPInt number uses *unlimited precision*
 static constexpr std::size_t Unlimited = 0;
 
-// concept ensuring MPInt number has valid precision parameter
+// ensuring MPInt number has valid precision parameter -> integer >= 4 or
+// specific constant for unlimited precision
 template <std::size_t PRECISION>
 concept Valid_MPInt_Precision = (PRECISION >= 4) || PRECISION == Unlimited;
 
+// how digits are stored inside mpint
 using digits_type = std::vector<std::uint8_t>;
 
-// default value = +0
+// Stores the MPInt_Value, can only create and normalize - all fancy operations
+// are implemented on MPInt default value = +0
 struct MPInt_Value {
   // digits_ is effectivelly an array of unsigned bytes,
   // the LSB is at bytes_[0]
@@ -137,33 +140,45 @@ struct MPInt_Value {
   }
 };
 
-// forward declare
+// forward declare - because the Overflow_Error class needs to know about MPInt
 template <std::size_t PRECISION>
   requires Valid_MPInt_Precision<PRECISION>
 class MPInt;
 
-// specific error for overflowed number. find the precise number as public
-// attribute of error: value
+// specific error for overflowed number. stores the value which caused overflow.
+// the stored value is in unlimited precision, so no overflow would be caused
+// from it
 class Overflow_Error : public std::runtime_error {
+  static constexpr std::string default_message = "MPInt overflow";
+
 protected:
   MPInt_Value value_;
 
 public:
+  // move constructor
   explicit Overflow_Error(MPInt_Value &&value)
-      : std::runtime_error("MPInt overflow"), value_(std::move(value)) {}
+      : std::runtime_error(default_message), value_(std::move(value)) {}
 
+  // copy constructor
   explicit Overflow_Error(const MPInt_Value &value)
-      : std::runtime_error("MPInt overflow"), value_(value) {}
+      : std::runtime_error(default_message), value_(value) {}
 
+  // move constructor with custom message
   explicit Overflow_Error(MPInt_Value &&value, std::string &&msg)
       : std::runtime_error(std::move(msg)), value_(std::move(value)) {}
 
+  // copy constructor with custom message
   explicit Overflow_Error(const MPInt_Value &value, std::string &&msg)
       : std::runtime_error(std::move(msg)), value_(value) {}
 
+  // get value which caused overflow in unlimited precision
+  // (is inline not to viole ODR)
   inline MPInt<Unlimited> unlimited_value() const;
 };
 
+// represents any integer number in precision not defined by machine, but by
+// parameter PRECISION (in bytes). use any integer >= 4 or MPInt::Unlimited for
+// unlimited precision
 template <std::size_t PRECISION>
   requires Valid_MPInt_Precision<PRECISION>
 class MPInt {
@@ -197,17 +212,16 @@ public:
     value_ = std::move(val);
   }
 
-  // wrap the value with class with all the functionality
+  // wrap the plain value with capable class
   MPInt(const MPInt_Value &value) { value_ = value; }
   MPInt(MPInt_Value &&value) { value_ = std::move(value); }
 
-  // copy semantics
+  // copy/move semantics
   MPInt(const MPInt &) = default;
-  // move semantics
   MPInt(MPInt &&) noexcept = default;
 
 private:
-  // if number is overflown throw error
+  // if value is overflown throw error
   static void check_overflow(const MPInt_Value &value) {
     if constexpr (PRECISION == Unlimited) {
       return;
@@ -219,7 +233,10 @@ private:
   }
 };
 
+// was declared in Overflow_Error, but due to it unknowing the templated class
+// MPInt, it must be defined after the MPInt class definition
 inline MPInt<Unlimited> Overflow_Error::unlimited_value() const {
+  // use constructor from MPInt to construct MPInt from MPInt_Value
   return MPInt<Unlimited>(value_);
 }
 
