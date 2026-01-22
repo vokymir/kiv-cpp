@@ -23,10 +23,11 @@ using digits_type = std::vector<std::uint8_t>;
 // bytes_ is effectivelly an array of unsigned bytes,
 // the LSB is at bytes_[0]
 struct MPInt_Value {
-  digits_type digits_;
+  // default value = 0
+  digits_type digits_{1, 0};
   bool is_positive_{true};
 
-  void normalize() {
+  void normalize() noexcept {
     while (digits_.size() > 1 && digits_.back() == 0) {
       digits_.pop_back();
     }
@@ -79,8 +80,9 @@ private:
 public:
   ~MPInt() = default;
 
-  // let the default value be 0 if none is assigned on creation
-  MPInt() : MPInt(0) {}
+  // let the default value be whatever is in MPInt_Value
+  // (There is sane default: 0)
+  MPInt() {}
 
   // based on given initial number, initialize the MPInt number.
   template <std::integral T> explicit MPInt(T number) {
