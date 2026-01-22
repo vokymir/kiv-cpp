@@ -16,6 +16,10 @@ namespace MPInt {
 // static size used for denoting that MPInt number uses *unlimited precision*
 static constexpr std::size_t Unlimited = 0;
 
+// in this namespace are all the details of implementation, which are not to be
+// shown in public API of MPInt:: *module*
+// although it is technically possible to use from the outside, it's clear that
+// it is not intended
 namespace _detail {
 
 // ensuring MPInt number has valid precision parameter -> integer >= 4 or
