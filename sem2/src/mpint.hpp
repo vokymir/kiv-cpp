@@ -554,8 +554,9 @@ public:
   // overflow
   template <std::size_t OTHER_PRECISION>
   MPInt<PRECISION> &operator+=(const MPInt<OTHER_PRECISION> &rhs) {
-    value_ = _detail::MPInt_Value::add(value_, rhs.value_);
-    check_overflow(value_);
+    auto value = _detail::MPInt_Value::add(value_, rhs.value_);
+    check_overflow(value);
+    value_ = std::move(value);
     return *this;
   }
 
@@ -563,8 +564,9 @@ public:
   // on overflow
   template <std::size_t OTHER_PRECISION>
   MPInt<PRECISION> &operator-=(const MPInt<OTHER_PRECISION> &rhs) {
-    value_ = _detail::MPInt_Value::sub(value_, rhs.value_);
-    check_overflow(value_);
+    auto value = _detail::MPInt_Value::sub(value_, rhs.value_);
+    check_overflow(value);
+    value_ = std::move(value);
     return *this;
   }
 
@@ -572,8 +574,9 @@ public:
   // throw on overflow
   template <std::size_t OTHER_PRECISION>
   MPInt<PRECISION> &operator*=(const MPInt<OTHER_PRECISION> &rhs) {
-    value_ = _detail::MPInt_Value::mul(value_, rhs.value_);
-    check_overflow(value_);
+    auto value = _detail::MPInt_Value::mul(value_, rhs.value_);
+    check_overflow(value);
+    value_ = std::move(value);
     return *this;
   }
 
@@ -581,8 +584,9 @@ public:
   // overflow
   template <std::size_t OTHER_PRECISION>
   MPInt<PRECISION> &operator/=(const MPInt<OTHER_PRECISION> &rhs) {
-    value_ = _detail::MPInt_Value::div(value_, rhs.value_);
-    check_overflow(value_);
+    auto value = _detail::MPInt_Value::div(value_, rhs.value_);
+    check_overflow(value);
+    value_ = std::move(value);
     return *this;
   }
 
@@ -629,8 +633,9 @@ public:
 
   // factorial: keep precision
   void factorial() {
-    value_ = _detail::MPInt_Value::fct(value_);
-    check_overflow(value_);
+    auto value = _detail::MPInt_Value::fct(value_);
+    check_overflow(value);
+    value_ = std::move(value);
   }
 };
 
