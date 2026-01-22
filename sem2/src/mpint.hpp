@@ -51,6 +51,15 @@ struct MPInt_Value {
     }
   }
 
+  // ===== constructors =====
+
+  MPInt_Value() = default;
+  // copy/move semantics
+  MPInt_Value(const MPInt_Value &) = default;
+  MPInt_Value(MPInt_Value &&) noexcept = default;
+  MPInt_Value &operator=(const MPInt_Value &) = default;
+  MPInt_Value &operator=(MPInt_Value &&) noexcept = default;
+
   // ===== Static constructors =====
 
   // make mpint_value from any integral type (int, long, ...)
@@ -523,6 +532,8 @@ public:
   // copy/move semantics
   MPInt(const MPInt &) = default;
   MPInt(MPInt &&) noexcept = default;
+  MPInt &operator=(const MPInt &) = default;
+  MPInt &operator=(MPInt &&) noexcept = default;
 
   // ===== Private methods =====
 private:
