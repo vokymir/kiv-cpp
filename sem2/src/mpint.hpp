@@ -24,7 +24,7 @@ using digits_type = std::vector<std::uint8_t>;
 // bytes_ is effectivelly an array of unsigned bytes,
 // the LSB is at bytes_[0]
 struct MPInt_Value {
-  // default value = 0
+  // default value = +0
   digits_type digits_{1, 0};
   bool is_positive_{true};
 
@@ -64,7 +64,56 @@ struct MPInt_Value {
     return value;
   }
 
-  static MPInt_Value from_string(const std::string &s); // TODO:
+  // assumptions: the numeric literals 0-9 are stored in ascending order list in
+  // character representation
+  // string is in decadic form
+  static MPInt_Value from_string(const std::string &s) {
+    if (s.empty()) {
+      throw std::invalid_argument("MPInt_Value: empty string");
+    }
+
+    MPInt_Value value;
+    std::size_t pos = 0;
+
+    // sign
+    if (s[0] == '-') {
+      value.is_positive_ = false;
+      pos = 1;
+    } else if (s[0] == '+') {
+      pos = 1;
+    }
+
+    if (pos == s.size()) {
+      throw std::invalid_argument("MPInt_Value: invalid numeric string");
+    }
+
+    for (; pos < s.size(); ++pos) {
+      char c = s[pos];
+
+      if (c < '0' || c > '9') {
+        throw std::invalid_argument("MPInt_Value: invalid character in string");
+      }
+
+      int digit = c - '0';
+      std::uint16_t carry = digit;
+
+      // multiply curr value by 10 and add digit
+      for (std::size_t i = 0; i < value.digits_.size(); ++i) {
+        std::uint16_t tmp =
+            static_cast<std::uint16_t>(value.digits_[i]) * 10 + carry;
+        value.digits_[i] = static_cast<std::uint8_t>(tmp & 0xFF);
+        carry = tmp >> 8;
+      }
+
+      while (carry > 0) {
+        value.digits_.push_back(static_cast<std::uint8_t>(carry & 0xFF));
+        carry >>= 8;
+      }
+    }
+
+    value.normalize();
+    return value;
+  }
 };
 
 // forward declare
