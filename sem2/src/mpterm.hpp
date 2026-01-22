@@ -168,7 +168,7 @@ private:
     auto op1 = get_first_operand(input, op_pos);
 
     if (op == _detail::Operator::Fct) {
-      process_operation(op1, op);
+      process_operation(op1, op, {});
       return;
     }
 
@@ -193,14 +193,21 @@ private:
     return op;
   }
 
-  std::string_view get_first_operand(const std::string &input,
-                                     std::size_t op_pos) {}
+  // get stringview on everything before the operand position
+  std::string_view get_first_operand(std::string_view &input,
+                                     std::size_t op_pos) {
+    return (op_pos < input.size()) ? input.substr(0, op_pos)
+                                   : std::string_view{};
+  }
 
-  std::string_view get_second_operand(const std::string &input,
-                                      std::size_t op_pos) {}
+  // get stringview on everything after the operand position
+  std::string_view get_second_operand(std::string_view input,
+                                      std::size_t op_pos) {
+    return (op_pos + 1 < input.size()) ? input.substr(op_pos + 1)
+                                       : std::string_view{};
+  }
 
-  void process_operation(const std::string_view &op1, _detail::Operator op) {}
-
+  // TODO: this & also save to bank
   void process_operation(const std::string_view &op1, _detail::Operator op,
                          const std::string_view &op2) {}
 };
