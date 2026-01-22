@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <deque>
 #include <iostream>
+// library allowing usage of arrow up/down in terminal
 #include <readline/history.h>
 #include <readline/readline.h>
 #include <stdexcept>
@@ -34,13 +35,16 @@ public:
   }
 
   // return copy of number at given index
-  mpint get(std::size_t index) {
+  mpint get(std::size_t index) const {
     if (index >= bank_.size()) {
       throw std::range_error("Access to bank at invalid index");
     }
 
     return bank_[index];
   }
+
+  // return size of bank
+  std::size_t size() const { return bank_.size(); }
 };
 
 } // namespace _detail
@@ -50,6 +54,7 @@ template <std::size_t P>
 class MPTerm {
 private:
   _detail::Bank<P, 5> bank_;
+  bool running = false;
 
 public:
   // run the MP Terminal
@@ -58,8 +63,8 @@ public:
               << ((P == 0) ? "infinite" : std::to_string(P)) << " bytes."
               << std::endl;
 
-    bool exit = false;
-    while (!exit) {
+    running = true;
+    while (running) {
       char *input = readline("> ");
 
       if (!input) {
@@ -68,6 +73,7 @@ public:
 
       if (*input) {
         add_history(input);
+        handle_input(input);
       }
 
       free(input);
@@ -76,6 +82,29 @@ public:
     std::cout << "Thank you for using the Multiple Precision Terminal."
               << std::endl;
   }
+
+private:
+  void handle_input(const std::string &input) {
+    if (input == "bank") {
+      cmd_show_bank();
+
+    } else if (input == "exit") {
+      cmd_exit();
+
+    } else {
+      cmd_expression(input);
+    }
+  }
+
+  void cmd_show_bank() {
+    for (std::size_t i = 0; i < bank_.size(); ++i) {
+      std::cout << "$" << std::to_string(i) << " " << bank_.get(i) << "\n";
+    }
+  }
+
+  void cmd_exit() { running = false; }
+
+  void cmd_expression(const std::string &input) {}
 };
 
 } // namespace MPTerm
