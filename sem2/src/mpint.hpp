@@ -210,8 +210,27 @@ struct MPInt_Value {
     return result;
   }
 
-  // TODO: factorial - only need one value
-  static MPInt_Value fct(const MPInt_Value &a, const MPInt_Value &b) {}
+  // factorial of a
+  // return new MPInt_Value
+  static MPInt_Value fct(const MPInt_Value &a) {
+    if (!a.is_positive_) {
+      throw std::domain_error(
+          "Factorial is here only defined on non-negative integers.");
+    }
+
+    // start with 1 for 0!
+    MPInt_Value result = MPInt_Value::from_integral(1);
+    // helper to avoid repeated allocation
+    MPInt_Value one = MPInt_Value::from_integral(1);
+
+    // iterate from a to 0, how to read:
+    // for (i = a; i > 0; --i)
+    for (MPInt_Value i{a}; !i.is_zero(); i = MPInt_Value::sub(i, one)) {
+      result = MPInt_Value::mul(result, i);
+    }
+
+    return result;
+  }
 
   // === UNSIGNED ===
 
@@ -222,8 +241,6 @@ struct MPInt_Value {
   static MPInt_Value mul_abs(const MPInt_Value &a, const MPInt_Value &b) {}
 
   static MPInt_Value div_abs(const MPInt_Value &a, const MPInt_Value &b) {}
-
-  static MPInt_Value fct_abs(const MPInt_Value &a, const MPInt_Value &b) {}
 
   // ==== Compare operations ====
 
@@ -248,6 +265,9 @@ struct MPInt_Value {
     // all digits are the same
     return 0;
   }
+
+  // check if MPInt_Value is zero
+  bool is_zero() const { return digits_.size() == 1 && digits_[0] == 0; }
 };
 
 // forward declare - because the Overflow_Error class needs to know about
