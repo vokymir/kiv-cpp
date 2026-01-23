@@ -493,7 +493,11 @@ struct MPInt_Value {
     // divide by base and store remainder
     while (!(tmp.digits_.size() == 1 && tmp.digits_[0] == 0)) {
       auto rem = div_small(tmp, base);
-      out.push_back(static_cast<char>('0' + rem));
+      if (rem < 10) { // bases lesser than 10
+        out.push_back('0' + rem);
+      } else { // higher bases uses capital letters
+        out.push_back('A' + (rem - 10));
+      }
     }
 
     if (!is_positive_) {
