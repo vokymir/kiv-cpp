@@ -8,6 +8,7 @@
 #include <ostream>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 #include <type_traits>
 #include <vector>
 
@@ -113,7 +114,7 @@ struct MPInt_Value {
   // assumptions: the numeric literals 0-9 are stored in ascending order list in
   // character representation
   // string is in decadic form
-  static MPInt_Value from_string(const std::string &s) {
+  static MPInt_Value from_string(const std::string_view &s) {
     if (s.empty()) {
       throw std::invalid_argument("MPInt_Value: empty string");
     }
@@ -573,7 +574,7 @@ public:
   // based on given string (must be a valid numeric string with optional
   // leading sign, no whitespaces, no trailing spaces), initialize the MPInt
   // number
-  explicit MPInt(const std::string &number_s) {
+  explicit MPInt(const std::string_view &number_s) {
     auto val = _detail::MPInt_Value::from_string(number_s);
     check_overflow(val);
     value_ = std::move(val);
