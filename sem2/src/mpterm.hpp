@@ -233,8 +233,9 @@ private:
 
     // factorial is a special case - requires only 1 operand
     if (op == _detail::Operator::Fct) {
-      result = operand1.factorial();
-      bank_.push(result);
+      result = operand1;
+      result.factorial();
+      bank_.push(std::move(result));
       return;
     }
 
@@ -254,7 +255,7 @@ private:
     }
 
     // save to bank
-    bank_.push(result);
+    bank_.push(std::move(result));
   }
 
   // get the actual MPInt from str. handle normal number and bank $x
