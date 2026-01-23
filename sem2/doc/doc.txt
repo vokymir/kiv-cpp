@@ -1,0 +1,1 @@
+TODO: nefunguje div, mixuje se tam LSB(vsude) a MSB(jen tam)
