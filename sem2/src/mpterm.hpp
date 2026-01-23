@@ -113,7 +113,7 @@ public:
         << "Welcome to Multiple Precision Terminal.\nCurrent precision is "
         << ((P == 0) ? "infinite" : std::to_string(P))
         << " bytes.\nWrite simple mathematical expression with at most one "
-           "operation from +.-,*,/,! or the command 'bank' or 'exit'."
+           "operation from +,-,*,/,! or the command 'bank' or 'exit'."
         << std::endl;
 
     running = true;
@@ -188,13 +188,15 @@ private:
     // formatting)
     try {
       process_operation(op1, op, op2);
+
+      // TODO: TEMPORARY
     } catch (const std::exception &e) {
       std::cout << e.what() << std::endl;
       return;
     }
 
     catch (...) {
-      std::cout << "Invalid input (make sure it has no spaces)." << std::endl;
+      std::cout << "Invalid input " << std::endl;
       return;
     }
 
