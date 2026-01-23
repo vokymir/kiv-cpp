@@ -439,13 +439,13 @@ struct MPInt_Value {
     }
 
     // from the MSD (most right) traverse all digits
-    for (size_t i = a.digits_.size() - 1; i >= 0; --i) {
-      if (a.digits_[i] == b.digits_[i]) { // same digit
+    for (size_t i = a.digits_.size(); i > 0; --i) {
+      if (a.digits_[i - 1] == b.digits_[i - 1]) { // same digit
         continue;
       }
 
       // different digit
-      return (a.digits_[i] > b.digits_[i]) ? 1 : -1;
+      return (a.digits_[i - 1] > b.digits_[i - 1]) ? 1 : -1;
     }
 
     // all digits are the same
