@@ -18,6 +18,7 @@ namespace _detail {
 
 // bank for MPInt numbers with precision P, where atmost N numbers are stored
 // allow pushing new numbers & getting at any index
+// WARNING: uses 1-based array numbering
 template <std::size_t P, std::size_t N> struct Bank {
   using mpint = MPInt::MPInt<P>;
 
@@ -37,7 +38,9 @@ public:
   }
 
   // return copy of number at given index
+  // WARN: first number is at index 1
   mpint get(std::size_t index) const {
+    index -= 1; // convert to standard 0-based indexing
     if (index >= bank_.size()) {
       throw std::range_error("Access to bank at invalid index");
     }
