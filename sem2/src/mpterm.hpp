@@ -151,7 +151,7 @@ private:
 
   // process command 'bank' and show bank in the terminal
   void cmd_show_bank() {
-    for (std::size_t i = 0; i < bank_.size(); ++i) {
+    for (std::size_t i = 1; i <= bank_.size(); ++i) {
       std::cout << "$" << std::to_string(i) << " " << bank_.get(i) << "\n";
     }
   }
@@ -192,7 +192,7 @@ private:
     }
 
     // show the result
-    std::cout << "$1 = " << bank_.get(0) << std::endl;
+    std::cout << "$1 = " << bank_.get(1) << std::endl;
   }
 
   // get the first found operator in the string input by comparing all chars
