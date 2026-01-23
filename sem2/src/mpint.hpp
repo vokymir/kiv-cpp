@@ -607,7 +607,9 @@ private:
     }
 
     if (value.digits_.size() > PRECISION) {
-      throw Overflow_Error(value);
+      // NOTE: is this legitimate? I declare value const before, but now I move
+      // it...
+      throw Overflow_Error(std::move(value));
     }
   }
 
@@ -661,7 +663,7 @@ public:
   // operator for adding: keep higher precision, is using += internally
   template <std::size_t OTHER_PRECISION>
   MPInt<higher_precision<PRECISION, OTHER_PRECISION>>
-  operator+(const MPInt<OTHER_PRECISION> &other) {
+  operator+(const MPInt<OTHER_PRECISION> &other) const {
     MPInt<higher_precision<PRECISION, OTHER_PRECISION>> result(*this);
     result += other;
     return result;
@@ -670,7 +672,7 @@ public:
   // operator for subtracting: keep higher precision, is using -= internally
   template <std::size_t OTHER_PRECISION>
   MPInt<higher_precision<PRECISION, OTHER_PRECISION>>
-  operator-(const MPInt<OTHER_PRECISION> &other) {
+  operator-(const MPInt<OTHER_PRECISION> &other) const {
     MPInt<higher_precision<PRECISION, OTHER_PRECISION>> result(*this);
     result -= other;
     return result;
@@ -679,7 +681,7 @@ public:
   // operator for multiplying: keep higher precision, is using *= internally
   template <std::size_t OTHER_PRECISION>
   MPInt<higher_precision<PRECISION, OTHER_PRECISION>>
-  operator*(const MPInt<OTHER_PRECISION> &other) {
+  operator*(const MPInt<OTHER_PRECISION> &other) const {
     MPInt<higher_precision<PRECISION, OTHER_PRECISION>> result(*this);
     result *= other;
     return result;
@@ -688,7 +690,7 @@ public:
   // operator for dividing: keep higher precision, is using /= internally
   template <std::size_t OTHER_PRECISION>
   MPInt<higher_precision<PRECISION, OTHER_PRECISION>>
-  operator/(const MPInt<OTHER_PRECISION> &other) {
+  operator/(const MPInt<OTHER_PRECISION> &other) const {
     MPInt<higher_precision<PRECISION, OTHER_PRECISION>> result(*this);
     result /= other;
     return result;
