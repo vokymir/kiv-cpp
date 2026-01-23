@@ -200,7 +200,11 @@ struct MPInt_Value {
     int cmp = cmp_abs(a, b);
 
     if (a.is_positive_ == b.is_positive_) { // same sign
-      result = sub_abs(a, b);
+      if (cmp >= 0) {
+        result = sub_abs(a, b);
+      } else {
+        result = sub_abs(b, a);
+      }
       // if b > a: invert sign of a, else keep sign of a
       result.is_positive_ = (cmp < 0) ? !a.is_positive_ : a.is_positive_;
 
