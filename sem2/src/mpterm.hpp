@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <deque>
+#include <exception>
 #include <iostream>
 // library allowing usage of arrow up/down in terminal
 #include <readline/history.h>
@@ -152,7 +153,7 @@ private:
   // process command 'bank' and show bank in the terminal
   void cmd_show_bank() {
     for (std::size_t i = 1; i <= bank_.size(); ++i) {
-      std::cout << "$" << std::to_string(i) << " " << bank_.get(i) << "\n";
+      std::cout << "$" << std::to_string(i) << " = " << bank_.get(i) << "\n";
     }
   }
 
@@ -186,7 +187,12 @@ private:
     // formatting)
     try {
       process_operation(op1, op, op2);
-    } catch (...) {
+    } catch (const std::exception &e) {
+      std::cout << e.what() << std::endl;
+      return;
+    }
+
+    catch (...) {
       std::cout << "Invalid input (make sure it has no spaces)." << std::endl;
       return;
     }
