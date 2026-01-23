@@ -189,8 +189,17 @@ private:
     try {
       process_operation(op1, op, op2);
 
-      // TODO: TEMPORARY
-    } catch (const std::exception &e) {
+    }
+
+    catch (const MPInt::Overflow_Error &e) {
+      std::cout << e.what()
+                << "\nValue causing overflow: " << e.unlimited_value()
+                << std::endl;
+      return;
+    }
+
+    // TODO: TEMPORARY?
+    catch (const std::exception &e) {
       std::cout << e.what() << std::endl;
       return;
     }
