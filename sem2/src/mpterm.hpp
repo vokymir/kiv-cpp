@@ -244,12 +244,16 @@ private:
     switch (op) {
     case _detail::Operator::Add:
       result = operand1 + operand2;
+      break;
     case _detail::Operator::Sub:
       result = operand1 - operand2;
+      break;
     case _detail::Operator::Mul:
       result = operand1 * operand2;
+      break;
     case _detail::Operator::Div:
       result = operand1 / operand2;
+      break;
     default:
       throw std::runtime_error("Invalid operator .");
     }
