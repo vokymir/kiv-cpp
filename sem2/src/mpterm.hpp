@@ -2,6 +2,7 @@
 
 #include "mpint.hpp"
 #include <algorithm>
+#include <charconv>
 #include <cstddef>
 #include <deque>
 #include <exception>
@@ -276,18 +277,29 @@ private:
   // - operand is a number, but it's too big for precision
   // - operand is $x and the index is wrong/too big/small
   MPInt::MPInt<P> get_operand(std::string_view str) {
-    if (str.empty()) {
+    // trim spaces
+    auto l = str.find_first_not_of(' ');
+    auto r = str.find_last_not_of(' ');
+    if (l == std::string_view::npos) {
+      throw std::invalid_argument("Empty operand.");
     }
-    std::size_t pos = str.find('$');
+    str = str.substr(l, r - l + 1);
 
-    // there is no '$' => regular big number
-    if (pos == std::string::npos) {
+    // normal number
+    if (str[0] != '$') {
       return MPInt::MPInt<P>(str);
     }
 
-    // get from bank at index which is right after $
-    pos = std::min(pos + 1, str.size() - 1); // safe access
-    int index = std::atoi(str.substr(pos + 1).data());
+    // number from bank
+    int index = 0;
+    auto idx_view = str.substr(1);
+
+    auto [ptr, ec] = std::from_chars(idx_view.data(),
+                                     idx_view.data() + idx_view.size(), index);
+    if (ec != std::errc{} || index <= 0) {
+      throw std::invalid_argument("Invalid bank reference.");
+    }
+
     return bank_.get(index);
   }
 };
