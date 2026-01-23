@@ -1,1 +1,3 @@
 TODO: nefunguje div, mixuje se tam LSB(vsude) a MSB(jen tam)
+TODO: mpterm by mohlo odchytavat sigint a davat hezkej exit
+TODO: bank by mel nabizet i const reference - aby vypis banku netrval dlouho
