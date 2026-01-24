@@ -202,8 +202,10 @@ private:
       std::cout << "Operation caused overflow, because its result couldn't fit "
                    "inside terminal precision ("
                 << ((P == 0) ? "infinite" : std::to_string(P))
-                << " bytes).\nResult: " << e.unlimited_value() << std::endl;
-      return;
+                << " bytes).\nResult: " << e.unlimited_value()
+                << "\nSaved as number with terminal precision." << std::endl;
+
+      bank_.push(MPInt::MPInt<P>(e.unlimited_value()));
 
     } catch (const std::exception &e) {
       std::cerr << e.what() << std::endl;

@@ -572,6 +572,10 @@ private:
   // internal storage of number
   _detail::MPInt_Value value_;
 
+  // ===== Getters =====
+public:
+  const _detail::MPInt_Value &value() const { return value_; }
+
   // ===== Constuctors =====
 public:
   ~MPInt() = default;
@@ -594,6 +598,20 @@ public:
     auto val = _detail::MPInt_Value::from_string(number_s);
     check_overflow(val);
     value_ = std::move(val);
+  }
+
+  // convert from another precision - if new precision is lower will make MAX
+  // value in current precision
+  template <std::size_t OTHER_PRECISION>
+    requires _detail::Valid_MPInt_Precision<OTHER_PRECISION>
+  explicit MPInt(const MPInt<OTHER_PRECISION> &number) {
+    if constexpr (PRECISION == Unlimited) {
+      value_ = number.value();
+      return;
+    }
+
+    value_.digits_.resize(PRECISION, 0xFF);
+    value_.is_positive_ = number.value().is_positive_;
   }
 
   // wrap the plain value with capable class
