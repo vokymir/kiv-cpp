@@ -1,7 +1,11 @@
 #pragma once
 
+// use fancy functionality of readline/ library on UNIX, but be compatible on
+// windows simply by overlaying used functions from library with custom ones
+// defined here
 #ifdef _WIN32
-#include <iostream>
+// just a simple wrapper around getline (supported on WIN/UNIX), adhering to
+// readline API, which returns char *
 #define readline(prompt)                                                       \
   ([]() {                                                                      \
     std::string line;                                                          \
@@ -11,6 +15,8 @@
     std::strcpy(cstr, line.c_str());                                           \
     return cstr;                                                               \
   }())
+
+// don't do any history on WIN
 #define add_history(x) ((void)0)
 #else
 #include <readline/history.h>

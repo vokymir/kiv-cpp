@@ -21,6 +21,7 @@ add_executable(${PROJECT_NAME} ${SOURCES})
 # add library for nicer terminal - use of arrow UP/DOWN
 if(WIN32)
     message(STATUS "Windows detected: skipping readline")
+    # in MPTerm are macros to handle WIN support
 else()
     target_link_libraries(${PROJECT_NAME} PRIVATE readline)
 endif()
