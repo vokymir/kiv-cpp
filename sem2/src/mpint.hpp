@@ -385,6 +385,7 @@ struct MPInt_Value {
 
     for (std::size_t i = a.digits_.size(); i-- > 0;) {
 
+      // shift remainder by one byte and add byte from a
       remainder.normalize();
       // insert is O(n) operation, so avoid if possible
       if (!remainder.is_zero()) {
@@ -393,9 +394,11 @@ struct MPInt_Value {
       remainder.digits_[0] = a.digits_[i];
       remainder.normalize();
 
+      // find how many times b fits in remainder
       std::uint8_t q = find_quotient_digit(remainder, b);
       quotient.digits_[i] = q;
 
+      // subtract b*q from remainder
       if (q != 0) {
         MPInt_Value product = mul(b, MPInt_Value::from_integral(q));
         remainder = sub(remainder, product);
@@ -410,6 +413,7 @@ struct MPInt_Value {
 
   // find the largest single-byte multiplier which satisfies:
   // b * multiplier <= remainder
+  // using binary search
   static std::uint8_t find_quotient_digit(const MPInt_Value &remainder,
                                           const MPInt_Value &b) {
     int multiplier = 0;
