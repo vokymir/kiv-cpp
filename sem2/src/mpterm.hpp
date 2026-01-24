@@ -208,7 +208,7 @@ private:
     // [spaces][$]number[spaces]operator[spaces][$]number[spaces]
     // where second number is optional (because of factorial)
     static const std::regex expression(
-        R"(^\s*([$\d]+)\s*([+\-*/!])\s*([$\d]*)\s*$)");
+        R"(^\s*([+-]?[$\d]+)\s*([+\-*/!])\s*([+-]?[$\d]*)\s*$)");
     // (if there is $$1, it will fail)
 
     std::smatch match;
