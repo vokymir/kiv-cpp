@@ -4,6 +4,7 @@
 // windows simply by overlaying used functions from library with custom ones
 // defined here
 #ifdef _WIN32
+#include <cstring>
 // just a simple wrapper around getline (supported on WIN/UNIX), adhering to
 // readline API, which returns char *
 #define readline(prompt)                                                       \
@@ -12,7 +13,7 @@
     std::cout << prompt;                                                       \
     std::getline(std::cin, line);                                              \
     char *cstr = new char[line.size() + 1];                                    \
-    std::strcpy(cstr, line.c_str());                                           \
+    strcpy(cstr, line.c_str());                                                \
     return cstr;                                                               \
   }())
 
