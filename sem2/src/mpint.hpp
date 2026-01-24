@@ -12,6 +12,9 @@
 #include <type_traits>
 #include <vector>
 
+// Multiple Precision Integer number library. Use the provided MPInt class. All
+// implementation details are hidden inside _detail namespace, which is not
+// advised to use directly.
 namespace MPInt {
 
 // static size used for denoting that MPInt number uses *unlimited precision*
@@ -28,36 +31,52 @@ namespace _detail {
 template <std::size_t PRECISION>
 concept Valid_MPInt_Precision = (PRECISION >= 4) || PRECISION == Unlimited;
 
-// how digits are stored inside mpint
+// how digits are stored inside mpint, being the LSB is at index 0
+// Why vector:
+// + provides random access
+// + append is O(1) - good for most operations
+// - prepend is O(n) - bad for division
+// NOTE: if at any time this is changed, complete re-thinking of the project
+// might be needed
 using digits_type = std::vector<std::uint8_t>;
 
-// Stores the MPInt_Value, can only create and normalize - all fancy operations
-// are implemented on MPInt default value = +0
+// Struct which in fact represents the multiple precision value. Provides useful
+// methods for constructing and supported math operations.
+// The *flagship* class MPInt uses this and only add upon it.
+//
+// Main reason for existence is the Overflow_Error, which needs to be able to
+// store MPInt, but is used inside MPInt. So this struct breaks circular
+// dependency.
 struct MPInt_Value {
   // ===== Variables =====
-
+  // as this is only internally used in MPInt, no private variables and
+  // getters/setters were used
+public:
   // digits_ is effectivelly an array of unsigned bytes,
   // the LSB is at bytes_[0]
+  // default value is 0, it being one byte which equal zero
   digits_type digits_{0};
 
+  // support for negative numbers, while having the simple unsigned number
+  // representation in digits_
   bool is_positive_{true};
 
   // ===== Public methods =====
 
   // make the digits_ vector as small as possible, ensure normal form of value
   void normalize() noexcept {
-    // don't allow trailing zeros: 07 > 7, -01 > -1, 00 > 0
+    // don't allow trailing zeros: 07 -> 7, -01 -> -1, 00 -> 0
     while (digits_.size() > 1 && digits_.back() == 0) {
       digits_.pop_back();
     }
 
-    // only allow one zero, the positive one: -0 > +0
+    // only allow one zero, the positive one: -0 -> +0
     if (digits_.size() == 1 && digits_.front() == 0) {
       is_positive_ = true;
     }
   }
 
-  // ===== constructors =====
+  // ===== Constructors =====
 
   MPInt_Value() = default;
   // copy/move semantics
@@ -101,6 +120,7 @@ struct MPInt_Value {
     // copy digits - do/while because we want to copy 0, which escapes condition
     // on first check
     do {
+      // only use lowest 8 bits
       value.digits_.push_back(static_cast<std::uint8_t>(uu & 0xFF));
       uu >>= 8;
     } while (uu > 0);
@@ -109,11 +129,10 @@ struct MPInt_Value {
     return value;
   }
 
-  // make mpint_value from numeric string - may start with sign +/-, all other
-  // characters must be numeric
-  // assumptions: the numeric literals 0-9 are stored in ascending order list in
-  // character representation
-  // string is in decadic form
+  // make mpint_value from numeric decadic string - may start with sign +/-, all
+  // other characters must be numeric. assumptions: the numeric literals 0-9 are
+  // stored in ascending order list in character representation; string is in
+  // decadic form
   static MPInt_Value from_string(const std::string_view &s) {
     if (s.empty()) {
       throw std::invalid_argument("MPInt_Value: empty string");
@@ -122,7 +141,7 @@ struct MPInt_Value {
     MPInt_Value value;
     std::size_t pos = 0;
 
-    // sign
+    // sign (default is positive)
     if (s[0] == '-') {
       value.is_positive_ = false;
       pos = 1;
@@ -130,7 +149,7 @@ struct MPInt_Value {
       pos = 1;
     }
 
-    if (pos == s.size()) {
+    if (pos == s.size()) { // only sign
       throw std::invalid_argument("MPInt_Value: invalid numeric string");
     }
 
@@ -240,7 +259,7 @@ struct MPInt_Value {
     return result;
   }
 
-  // factorial of a
+  // factorial of a (signed, but only works on a >= 0)
   // return new MPInt_Value
   static MPInt_Value fct(const MPInt_Value &a) {
     if (!a.is_positive_) {
@@ -254,7 +273,7 @@ struct MPInt_Value {
     MPInt_Value one = MPInt_Value::from_integral(1);
 
     // iterate from a to 0, how to read:
-    // for (i = a; i > 0; --i)
+    // for (i = a; i != 0; --i)
     for (MPInt_Value i{a}; !i.is_zero(); i = MPInt_Value::sub(i, one)) {
       result = MPInt_Value::mul(result, i);
     }
@@ -270,6 +289,7 @@ struct MPInt_Value {
   static MPInt_Value add_abs(const MPInt_Value &a, const MPInt_Value &b) {
     MPInt_Value result;
 
+    // prepare bytes in result
     const std::size_t max_size = std::max(a.digits_.size(), b.digits_.size());
     result.digits_.resize(max_size, 0);
 
@@ -290,7 +310,7 @@ struct MPInt_Value {
       carry = sum >> 8;
     }
 
-    // overflow from max_size (don't have to be a problem due to normalization)
+    // bigger than expected max_size
     if (carry != 0) {
       result.digits_.push_back(static_cast<std::uint8_t>(carry));
     }
@@ -307,7 +327,7 @@ struct MPInt_Value {
     }
 
     MPInt_Value result;
-    result.digits_.resize(a.digits_.size(), 0); // a >= b
+    result.digits_.resize(a.digits_.size(), 0); // a >= b, that's why size of a
 
     std::int16_t borrow = 0;
 
@@ -336,10 +356,14 @@ struct MPInt_Value {
     return result;
   }
 
+  // multiply abs(a) * abs(b)
+  // doesn't normalize, return new MPInt_Value
   static MPInt_Value mul_abs(const MPInt_Value &a, const MPInt_Value &b) {
     MPInt_Value result;
+    // at most will have this many digits
     result.digits_.resize(a.digits_.size() + b.digits_.size(), 0);
 
+    // O(mn), each digit from a with each digit from b
     for (std::size_t i = 0; i < a.digits_.size(); ++i) {
       std::uint16_t carry = 0;
 
@@ -368,6 +392,8 @@ struct MPInt_Value {
     return result;
   }
 
+  // division of abs(a)/abs(b)
+  // return new MPInt_Value which is NOT normalized
   static MPInt_Value div_abs(const MPInt_Value &a, const MPInt_Value &b) {
     if (b.is_zero()) {
       throw std::domain_error("MPInt_Value::div_abs: division by zero");
@@ -379,18 +405,20 @@ struct MPInt_Value {
     }
 
     MPInt_Value quotient;
+    // at most will have this many digits
     quotient.digits_.resize(a.digits_.size(), 0);
 
     MPInt_Value remainder;
 
     for (std::size_t i = a.digits_.size(); i-- > 0;) {
 
-      // shift remainder by one byte and add byte from a
-      remainder.normalize();
-      // insert is O(n) operation, so avoid if possible
+      remainder.normalize(); // for the zero check to work
+      // insert at begin is O(n) operation, so avoid if possible
       if (!remainder.is_zero()) {
+        // shift remainder by one byte
         remainder.digits_.insert(remainder.digits_.begin(), 0);
       }
+      // add byte from a
       remainder.digits_[0] = a.digits_[i];
       remainder.normalize();
 
@@ -409,7 +437,7 @@ struct MPInt_Value {
     return quotient;
   }
 
-  // == helper for division ==
+  // == Helper for division ==
 
   // find the largest single-byte multiplier which satisfies:
   // b * multiplier <= remainder
@@ -463,7 +491,7 @@ struct MPInt_Value {
   // check if MPInt_Value is zero
   bool is_zero() const { return digits_.size() == 1 && digits_[0] == 0; }
 
-  // ===== when needed to stringify =====
+  // ===== When need to stringify =====
 
   // divide the value by small divisor (8bits), faster/cheaper but only useful
   // with small numbers - which is when converting to different bases (base10,
@@ -475,6 +503,7 @@ struct MPInt_Value {
     auto &d = val.digits_;
 
     // must go from MSD (right-most byte)
+    // works defacto the same as division by-hand
     for (auto it = d.rbegin(); it != d.rend(); ++it) {
       std::uint16_t curr = (carry << 8) | *it;
       *it = static_cast<std::uint8_t>(curr / div);
@@ -485,21 +514,25 @@ struct MPInt_Value {
     return static_cast<std::uint8_t>(carry);
   }
 
-  // convert number to string of any base from 2 to 255
+  // convert number to string of any base from 2 to 9+26=35
+  // only bases from 2 up makes sense to me. from 10+ it requires letters, which
+  // are 26 in the english alphabet, that's where the upper limit comes from -
+  // it could be 255 if I figured out the representation
   std::string to_string(std::uint8_t base = 10) const {
     if (digits_.size() == 1 && digits_[0] == 0) {
       return "0";
     }
 
-    if (base < 2 || base > 255) {
-      throw std::domain_error("Not supported base for number conversion.");
+    if (base < 2 || base > 35) {
+      throw std::domain_error(
+          "Not supported base for number conversion. Supported are: 2-35");
     }
 
     MPInt_Value tmp{*this}; // copy this for in-place division
     std::string out; // initially stored in reversed order, fixed at the end
 
     // divide by base and store remainder
-    while (!(tmp.digits_.size() == 1 && tmp.digits_[0] == 0)) {
+    while (!tmp.is_zero()) {
       auto rem = div_small(tmp, base);
       if (rem < 10) { // bases lesser than 10
         out.push_back('0' + rem);
@@ -512,6 +545,7 @@ struct MPInt_Value {
       out.push_back('-');
     }
 
+    // we have the string reversed for obvious reasons
     std::reverse(out.begin(), out.end());
     return out;
   }
@@ -523,8 +557,8 @@ template <std::size_t PRECISION>
   requires _detail::Valid_MPInt_Precision<PRECISION>
 class MPInt;
 
-// MPInt was here only forward declared - because the Overflow_Error class needs
-// to know about MPInt
+// ^^^ MPInt was here only forward declared - because the Overflow_Error class
+// needs to know about MPInt
 
 // specific error for overflowed number. stores the value which caused
 // overflow. the stored value is in unlimited precision, so no overflow would
@@ -601,7 +635,8 @@ public:
   }
 
   // convert from another precision - if new precision is lower will make MAX
-  // value in current precision
+  // value in current precision.
+  // this is EXPLICIT on purpose to prevent unintentional precision loss
   template <std::size_t OTHER_PRECISION>
     requires _detail::Valid_MPInt_Precision<OTHER_PRECISION>
   explicit MPInt(const MPInt<OTHER_PRECISION> &number) {
@@ -614,9 +649,15 @@ public:
     value_.is_positive_ = number.value().is_positive_;
   }
 
-  // wrap the plain value with capable class
-  MPInt(const _detail::MPInt_Value &value) : value_(value) {}
-  MPInt(_detail::MPInt_Value &&value) : value_(std::move(value)) {}
+  // wrap the plain value with this MPInt class
+  MPInt(const _detail::MPInt_Value &value) {
+    check_overflow(value);
+    value_ = std::move(value);
+  }
+  MPInt(_detail::MPInt_Value &&value) {
+    check_overflow(value);
+    value_ = std::move(value);
+  }
 
   // copy/move semantics
   MPInt(const MPInt &) = default;
@@ -732,14 +773,14 @@ public:
   std::string to_string() const { return value_.to_string(); }
 };
 
-// convert number to base10 numeric string
+// convert MPInt number to base10 numeric string
 template <std::size_t P>
 std::ostream &operator<<(std::ostream &os, const MPInt<P> &number) {
   return os << number.to_string();
 }
 
-// was declared in Overflow_Error, but due to it unknowing the templated class
-// MPInt, it must be defined after the MPInt class definition
+// was declared in Overflow_Error, but due to it not knowing the templated class
+// MPInt, it must be defined here, after the MPInt class definition
 inline MPInt<Unlimited> Overflow_Error::unlimited_value() const {
   // use constructor from MPInt to construct MPInt from MPInt_Value
   return MPInt<Unlimited>(value_);
