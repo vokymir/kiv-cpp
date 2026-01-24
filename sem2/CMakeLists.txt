@@ -18,8 +18,12 @@ file(GLOB_RECURSE SOURCES
 # main executable
 add_executable(${PROJECT_NAME} ${SOURCES})
 
-# add library for nicer terminal
-target_link_libraries(${PROJECT_NAME} PRIVATE readline) # cmd-like arrow up/down usage
+# add library for nicer terminal - use of arrow UP/DOWN
+if(WIN32)
+    message(STATUS "Windows detected: skipping readline")
+else()
+    target_link_libraries(${PROJECT_NAME} PRIVATE readline)
+endif()
 
 # set binaries dir for output
 set_target_properties(${PROJECT_NAME} PROPERTIES

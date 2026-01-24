@@ -1,5 +1,22 @@
 #pragma once
 
+#ifdef _WIN32
+#include <iostream>
+#define readline(prompt)                                                       \
+  ([]() {                                                                      \
+    std::string line;                                                          \
+    std::cout << prompt;                                                       \
+    std::getline(std::cin, line);                                              \
+    char *cstr = new char[line.size() + 1];                                    \
+    std::strcpy(cstr, line.c_str());                                           \
+    return cstr;                                                               \
+  }())
+#define add_history(x) ((void)0)
+#else
+#include <readline/history.h>
+#include <readline/readline.h>
+#endif
+
 #include "mpint.hpp"
 #include <algorithm>
 #include <charconv>
@@ -7,9 +24,6 @@
 #include <deque>
 #include <exception>
 #include <iostream>
-// library allowing usage of arrow up/down in terminal
-#include <readline/history.h>
-#include <readline/readline.h>
 #include <regex>
 #include <stdexcept>
 #include <string>
