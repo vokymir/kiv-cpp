@@ -16,6 +16,9 @@ void print_usage() {
             << std::endl;
 }
 
+// forward declare, defined after main to keep it high
+void showcase();
+
 int main(int argc, char **argv) {
   if (argc < 2) {
     print_usage();
@@ -29,8 +32,7 @@ int main(int argc, char **argv) {
   } else if (mode == "2") {
     start_terminal<32>();
   } else if (mode == "3") {
-    // TODO: showcase
-    std::cout << "Showcase is WIP" << std::endl;
+    showcase();
   } else {
     std::cerr << "Error: Unknown mode '" << mode << "'\n";
     print_usage();
@@ -38,4 +40,25 @@ int main(int argc, char **argv) {
   }
 
   return 0;
+}
+
+void showcase() {
+  std::cout << "=== MP Terminal Showcase ===\n"
+            << "Demonstrating unlimited & fixed precision, arithmetic, "
+               "factorial, and bank usage.\n"
+            << std::endl;
+  ;
+
+  // run a terminal of any precision
+  auto run_demo = [](auto prec, const std::string &label) {
+    std::cout << "\n~~~ " << label << " ~~~\n" << std::endl;
+
+    // template parameter deduced from type
+    using TermType = decltype(prec);
+    TermType term;
+    term.run_showcase();
+  };
+
+  run_demo(MPTerm::MPTerm<MPInt::Unlimited>{}, "Unlimited precision terminal");
+  run_demo(MPTerm::MPTerm<4>{}, "4-bytes precision terminal");
 }

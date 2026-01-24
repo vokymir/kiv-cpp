@@ -330,6 +330,30 @@ private:
     // this needs to be modifiable instance of MPInt, so copy
     return bank_.get_copy(index);
   }
+
+  // ===== Showcase =====
+
+public:
+  // show what this terminal is capable of
+  void run_showcase() {
+    std::vector<std::string> demo_expressions = {
+        "123 + 456",        // simple addition
+        "$1 * 2",           // multiplication using bank
+        "100!",             // factorial
+        "9876543210 / 123", // division with big number
+        "-42 - 100",        // subtraction with negatives
+        "$2 + $1",          // addition using two bank numbers
+    };
+
+    for (const auto &expr : demo_expressions) {
+      std::cout << "> " << expr << "\n";
+      cmd_expression(expr);
+      std::cout << "\n";
+    }
+
+    std::cout << "\n=== Final Bank State ===\n";
+    cmd_show_bank();
+  }
 };
 
 } // namespace MPTerm
