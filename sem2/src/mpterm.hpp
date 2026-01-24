@@ -162,9 +162,12 @@ private:
 
   // process command 'bank' and show bank in the terminal
   void cmd_show_bank() {
+    auto print_num = [this](std::size_t i) {
+      std::cout << "$" << i << " = " << bank_.get_const(i) << "\n";
+    };
+
     for (std::size_t i = 1; i <= bank_.size(); ++i) {
-      std::cout << "$" << std::to_string(i) << " = " << bank_.get_const(i)
-                << "\n";
+      print_num(i);
     }
   }
 
