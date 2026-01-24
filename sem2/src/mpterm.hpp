@@ -198,23 +198,20 @@ private:
     try {
       process_operation(op1, op, op2);
 
-    }
-
-    catch (const MPInt::Overflow_Error &e) {
-      std::cout << e.what()
-                << "\nValue causing overflow: " << e.unlimited_value()
-                << std::endl;
+    } catch (const MPInt::Overflow_Error &e) {
+      std::cout << "Operation caused overflow, because its result couldn't fit "
+                   "inside terminal precision ("
+                << ((P == 0) ? "infinite" : std::to_string(P))
+                << " bytes).\nResult: " << e.unlimited_value() << std::endl;
       return;
-    }
 
-    // TODO: TEMPORARY?
-    catch (const std::exception &e) {
-      std::cout << e.what() << std::endl;
+    } catch (const std::exception &e) {
+      std::cerr << e.what() << std::endl;
+      std::cout << "Invalid input" << std::endl;
       return;
-    }
 
-    catch (...) {
-      std::cout << "Invalid input " << std::endl;
+    } catch (...) {
+      std::cout << "Unknown error, presumably invalid input." << std::endl;
       return;
     }
 
