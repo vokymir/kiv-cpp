@@ -378,28 +378,30 @@ struct MPInt_Value {
       return MPInt_Value::from_integral(0);
     }
 
-    // a, but reversed
-    MPInt_Value a_rev = a;
-    // O(n) but only twice - here and at the end
-    std::reverse(a_rev.digits_.begin(), a_rev.digits_.end());
-
     MPInt_Value quotient;
     quotient.digits_.resize(a.digits_.size(), 0);
 
     MPInt_Value remainder;
-    remainder.digits_.clear();
 
-    // for all stored digits in a_reversed
-    for (std::size_t i = 0; i < a_rev.digits_.size(); ++i) {
-      remainder.digits_.push_back(a_rev.digits_[i]);
+    for (std::size_t i = a.digits_.size(); i-- > 0;) {
 
-      quotient.digits_[i] = find_quotient_digit(remainder, b);
-      remainder =
-          sub_abs(remainder,
-                  mul_abs(b, MPInt_Value::from_integral(quotient.digits_[i])));
+      remainder.normalize();
+      // insert is O(n) operation, so avoid if possible
+      if (!remainder.is_zero()) {
+        remainder.digits_.insert(remainder.digits_.begin(), 0);
+      }
+      remainder.digits_[0] = a.digits_[i];
+      remainder.normalize();
+
+      std::uint8_t q = find_quotient_digit(remainder, b);
+      quotient.digits_[i] = q;
+
+      if (q != 0) {
+        MPInt_Value product = mul(b, MPInt_Value::from_integral(q));
+        remainder = sub(remainder, product);
+      }
     }
 
-    std::reverse(a_rev.digits_.begin(), a_rev.digits_.end());
     quotient.normalize();
     return quotient;
   }
@@ -410,12 +412,14 @@ struct MPInt_Value {
   // b * multiplier <= remainder
   static std::uint8_t find_quotient_digit(const MPInt_Value &remainder,
                                           const MPInt_Value &b) {
-    std::uint8_t multiplier = 0;
-    std::uint8_t low = 0, high = 0xFF;
+    int multiplier = 0;
+    int low = 0;
+    int high = 255;
 
     while (low <= high) {
-      std::uint8_t mid = static_cast<std::uint8_t>((low + high) / 2);
-      MPInt_Value trial = mul_abs(b, MPInt_Value::from_integral(mid));
+      int mid = (low + high) / 2;
+
+      MPInt_Value trial = mul(b, MPInt_Value::from_integral(mid));
 
       if (cmp_abs(trial, remainder) <= 0) {
         multiplier = mid;
@@ -425,7 +429,7 @@ struct MPInt_Value {
       }
     }
 
-    return multiplier;
+    return static_cast<std::uint8_t>(multiplier);
   }
 
   // ==== Compare operations ====
@@ -589,8 +593,8 @@ public:
   }
 
   // wrap the plain value with capable class
-  MPInt(const _detail::MPInt_Value &value) { value_ = value; }
-  MPInt(_detail::MPInt_Value &&value) { value_ = std::move(value); }
+  MPInt(const _detail::MPInt_Value &value) : value_(value) {}
+  MPInt(_detail::MPInt_Value &&value) : value_(std::move(value)) {}
 
   // copy/move semantics
   MPInt(const MPInt &) = default;
@@ -607,9 +611,8 @@ private:
     }
 
     if (value.digits_.size() > PRECISION) {
-      // NOTE: is this legitimate? I declare value const before, but now I move
-      // it...
-      throw Overflow_Error(std::move(value));
+      // copy the value to error
+      throw Overflow_Error(value);
     }
   }
 
