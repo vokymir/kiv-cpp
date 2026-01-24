@@ -22,16 +22,14 @@ namespace _detail {
 // allow pushing new numbers & getting at any index
 // WARNING: uses 1-based array numbering
 template <std::size_t P, std::size_t N> struct Bank {
-  using mpint = MPInt::MPInt<P>;
-
 private:
   // at lower indices are newer numbers
-  std::deque<mpint> bank_;
+  std::deque<MPInt::MPInt<P>> bank_;
 
 public:
   // push new number to bank - reordering of numbers happens & ensure size N is
   // in place
-  void push(mpint &&number) {
+  void push(MPInt::MPInt<P> &&number) {
     bank_.emplace_front(std::move(number));
 
     while (bank_.size() > N) {
@@ -41,8 +39,18 @@ public:
 
   // return copy of number at given index
   // WARN: first number is at index 1
-  mpint get(std::size_t index) const {
+  MPInt::MPInt<P> get_copy(std::size_t index) const {
     index -= 1; // convert to standard 0-based indexing
+    if (index >= bank_.size()) {
+      throw std::range_error("Access to bank at invalid index");
+    }
+
+    return bank_[index];
+  }
+
+  // return const reference of number at given index
+  const MPInt::MPInt<P> &get_const(std::size_t index) const {
+    index -= 1;
     if (index >= bank_.size()) {
       throw std::range_error("Access to bank at invalid index");
     }
@@ -154,7 +162,8 @@ private:
   // process command 'bank' and show bank in the terminal
   void cmd_show_bank() {
     for (std::size_t i = 1; i <= bank_.size(); ++i) {
-      std::cout << "$" << std::to_string(i) << " = " << bank_.get(i) << "\n";
+      std::cout << "$" << std::to_string(i) << " = " << bank_.get_const(i)
+                << "\n";
     }
   }
 
@@ -210,7 +219,7 @@ private:
     }
 
     // show the result
-    std::cout << "$1 = " << bank_.get(1) << std::endl;
+    std::cout << "$1 = " << bank_.get_const(1) << std::endl;
   }
 
   // get the first found operator in the string input by comparing all chars
@@ -311,7 +320,7 @@ private:
       throw std::invalid_argument("Invalid bank reference.");
     }
 
-    return bank_.get(index);
+    return bank_.get_copy(index);
   }
 };
 
