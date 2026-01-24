@@ -10,6 +10,7 @@
 // library allowing usage of arrow up/down in terminal
 #include <readline/history.h>
 #include <readline/readline.h>
+#include <regex>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -172,29 +173,29 @@ private:
 
   // process mathematical expression
   void cmd_expression(const std::string &input) {
-    // find which operator was used
-    auto op = get_operator(input);
-    if (op == _detail::Operator::Invalid) {
+    // [spaces][$]number[spaces]operator[spaces][$]number[spaces]
+    static const std::regex expression(
+        R"(^\s*([$\d]+)\s*([+\-*/!])\s*([$\d]*)\s*$)");
+
+    std::smatch match;
+    if (!std::regex_match(input, match, expression)) {
       std::cout << "Invalid input." << std::endl;
       return;
     }
 
-    std::size_t op_pos = input.find(_detail::to_char(op));
-    if (op_pos == std::string::npos) {
-      std::cout << "Invalid operator." << std::endl;
+    // get operands & operator
+    std::string op1 = match[1].str();
+    _detail::Operator op = _detail::from_char(match[2].str()[0]);
+    std::string op2 = match[3].str();
+
+    // early fail on missing 2nd operator
+    if (op != _detail::Operator::Fct && op2.empty()) {
+      std::cout << "Second operand missing." << std::endl;
       return;
     }
 
-    // load operands
-    std::string_view op1 = get_first_operand_string(input, op_pos);
-
-    std::string_view op2{};
-    if (op != _detail::Operator::Fct) {
-      op2 = get_second_operand_string(input, op_pos);
-    }
-
-    // do the maths - may throw for variety of reasons (one of which is invalid
-    // formatting)
+    // do the maths - may throw for variety of reasons (one of which is
+    // invalid formatting)
     try {
       process_operation(op1, op, op2);
 
@@ -296,14 +297,6 @@ private:
   // - operand is a number, but it's too big for precision
   // - operand is $x and the index is wrong/too big/small
   MPInt::MPInt<P> get_operand(std::string_view str) {
-    // trim spaces
-    auto l = str.find_first_not_of(' ');
-    auto r = str.find_last_not_of(' ');
-    if (l == std::string_view::npos) {
-      throw std::invalid_argument("Empty operand.");
-    }
-    str = str.substr(l, r - l + 1);
-
     // normal number
     if (str[0] != '$') {
       return MPInt::MPInt<P>(str);
