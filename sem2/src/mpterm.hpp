@@ -222,36 +222,6 @@ private:
     std::cout << "$1 = " << bank_.get_const(1) << std::endl;
   }
 
-  // get the first found operator in the string input by comparing all chars
-  // (from left) to operators and wait until its not invalid
-  _detail::Operator get_operator(const std::string &input) {
-    _detail::Operator op = _detail::Operator::Invalid;
-
-    for (std::size_t i = 0; i < input.size(); ++i) {
-      op = _detail::from_char(input[i]);
-
-      if (op != _detail::Operator::Invalid) {
-        break;
-      }
-    }
-
-    return op;
-  }
-
-  // get stringview on everything before the operand position
-  std::string_view get_first_operand_string(std::string_view input,
-                                            std::size_t op_pos) {
-    return (op_pos < input.size()) ? input.substr(0, op_pos)
-                                   : std::string_view{};
-  }
-
-  // get stringview on everything after the operand position
-  std::string_view get_second_operand_string(std::string_view input,
-                                             std::size_t op_pos) {
-    return (op_pos + 1 < input.size()) ? input.substr(op_pos + 1)
-                                       : std::string_view{};
-  }
-
   // Get the actual numbers and do the math on them.
   // may throw on any get_operand() mismatch
   // and on any overflow
