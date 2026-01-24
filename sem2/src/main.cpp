@@ -51,7 +51,8 @@ void showcase() {
 
   // run a terminal of any precision
   auto run_demo = [](auto prec, const std::string &label) {
-    std::cout << "\n~~~ " << label << " ~~~\n" << std::endl;
+    std::cout << "\n~~~~~~~~~~~~~~~~~~~~~\n~~~ " << label
+              << "\n~~~~~~~~~~~~~~~~~~~~~" << std::endl;
 
     // template parameter deduced from type
     using TermType = decltype(prec);
