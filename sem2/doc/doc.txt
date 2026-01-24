@@ -1,1 +1,37 @@
+# Build
 
+mkdir -p build
+
+cmake -S . -B build
+cmake --build build
+
+# Run
+
+./bin/mpcalc.exe
+
+# Poznamky
+
+Precision je omezena na maximalni velikost size_t bajtů,
+protoze cisla jsou ukladany jako vector<std::uint8_t>,
+tudiz bude maximalne tolik bajtů, kolik je cisel v size_t.
+
+Schovat interni implementaci do namespace _details jsem vyzkousel tady poprve,
+a libi se mi jak *cisty* je verejny API - jen nevim, jestli je dobry napad to
+takhle delat.
+
+Rozdeleni MPInt na pomocnou MPInt_Value bylo puvodne neplanovany,
+ale ve vysledku to pomohlo a vypada to pekneji. Nevymyslel jsem, jak to udelat
+jinak a zaroven udrzet vsechno v jednom souboru.
+
+Normalizace MPInt_Value pomaha v optimalizaci - je vyuzito jen tolik bajtů,
+kolik je opravdu potreba.
+
+Pouziti knihovny readline/ je dost zbytecne, ale na linuxu jsem mel prijemnejsi
+zivot, kdyz jsem pouzival arrow up/down. Kdyby to delalo velky problem, jde
+to nahradit prenositelnou funkci std::getline.
+
+Neni nikde pouzita dedicnost, protoze me opravdu nenapadlo kde, aby to melo
+smysl. Ale myslim ze bod "rozumny objektovy navrh" jsem naplnil i bez dedicnosti.
+
+Nedokazal jsem poradne uchopit co ma delat showcase, snad to nejak odpovida tomu,
+co bylo ocekavano.
